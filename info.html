@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anleitung für Presenter</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            background-color: #111827; /* Fondo oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            color: #E5E7EB; /* Texto claro */
+        }
+
+        /* El "Canvas" o "Lienzo" */
+        #canvas {
+            background-color: #1F2937; /* Fondo de la tarjeta */
+            border-radius: 12px;
+            padding: 28px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border: 1px solid #374151;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #FFFFFF;
+            border-bottom: 2px solid #3B82F6; /* Acento azul */
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+
+        .schritt {
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .schritt-nummer {
+            display: inline-block;
+            background-color: #3B82F6;
+            color: #FFFFFF;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            margin-right: 12px;
+        }
+
+        .schritt-titel {
+            font-size: 20px;
+            font-weight: 600;
+            color: #FFFFFF;
+            display: inline;
+        }
+
+        .schritt-inhalt {
+            padding-left: 44px; /* Alineado con el texto, no con el número */
+            margin-top: 8px;
+            font-size: 16px;
+        }
+
+        /* Estilo para el botón de copiar */
+        .copy-button {
+            background-color: #3B82F6; /* Azul */
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 12px;
+            width: 100%;
+        }
+        .copy-button:hover {
+            background-color: #2563EB; /* Azul más oscuro */
+        }
+        .copy-button.copied {
+            background-color: #059669; /* Verde de éxito */
+        }
+
+        /* Estilo para mostrar el enlace del teleprompter */
+        code {
+            display: block;
+            background-color: #111827;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 15px;
+            margin-top: 12px;
+            word-break: break-all;
+        }
+        
+        code a {
+            color: #93C5FD; /* Azul claro para el enlace */
+            text-decoration: none;
+        }
+        code a:hover {
+            text-decoration: underline;
+        }
+
+        strong {
+            color: #FBBF24; /* Amarillo para énfasis */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="canvas">
+        
+        <h1>🚀 Anleitung für deinen YouTube-Live-Stream</h1>
+        
+        <div class="schritt">
+            <span class="schritt-nummer">1</span>
+            <h2 class="schritt-titel">📺 Link für dein Publikum (Folien)</h2>
+            <div class="schritt-inhalt">
+                <p>Klicke auf diesen Button. Der Link für die Folien (`solo-slides.html`) wird automatisch kopiert.</p>
+                
+                <button id="copy-slides-btn" class="copy-button">
+                    Link für Folien kopieren
+                </button>
+                
+                <p style="margin-top: 12px;">
+                    Öffne danach ein <strong>neues, separates Browser-Fenster</strong> (oder Tab) und füge den Link dort ein. Dieses Fenster teilst du später auf YouTube.
+                </p>
+            </div>
+        </div>
+
+        <div class="schritt">
+            <span class="schritt-nummer">2</span>
+            <h2 class="schritt-titel">🤫 Link für dich (Teleprompter)</h2>
+            <div class="schritt-inhalt">
+                <p>Dies ist dein <strong>privater</strong> Text. Öffne diesen Link auf deinem <strong>zweiten Gerät</strong> (z.B. iPad, Tablet oder zweiter Laptop):</p>
+                <code>
+                    <a href="https://maoumas.github.io/proyecto-petro/solo-teleprompter.html" target="_blank">
+                        https://maoumas.github.io/proyecto-petro/solo-teleprompter.html
+                    </a>
+                </code>
+            </div>
+        </div>
+
+        <div class="schritt">
+            <span class="schritt-nummer">3</span>
+            <h2 class="schritt-titel">🔴 Live gehen auf YouTube</h2>
+            <div class="schritt-inhalt">
+                <p>Starte deinen Stream auf YouTube. Wenn du "Bildschirm teilen" wählst:</p>
+                <p>Wähle <strong>NUR das Fenster aus Schritt 1</strong> (das Fenster mit `solo-slides.html`). Teile <strong>NIEMALS</strong> deinen "Gesamten Bildschirm".</p>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const copyButton = document.getElementById('copy-slides-btn');
+            
+            // El enlace que has proporcionado
+            const slideLink = 'https://maoumas.github.io/proyecto-petro/solo-slides.html';
+
+            copyButton.addEventListener('click', () => {
+                // Usar la API moderna del portapapeles
+                navigator.clipboard.writeText(slideLink).then(() => {
+                    // Éxito: Dar feedback visual
+                    copyButton.textContent = '✅ Link Kopiert!';
+                    copyButton.classList.add('copied');
+                    
+                    // Volver al texto original después de 2 segundos
+                    setTimeout(() => {
+                        copyButton.textContent = 'Link für Folien kopieren';
+                        copyButton.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    // Manejar error (aunque es poco probable)
+                    copyButton.textContent = 'Fehler beim Kopieren';
+                    console.error('Kopieren fehlgeschlagen: ', err);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
