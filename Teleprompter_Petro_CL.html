@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleprompter: Petro-Clinton Skandal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        
+        body {
+            background-color: #111;
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Steuerleiste */
+        #controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #222;
+            border-bottom: 2px solid #3B82F6; /* blue-600 */
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #controls button {
+            background-color: #3B82F6; /* blue-600 */
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #controls button:hover {
+            background-color: #2563EB; /* blue-700 */
+        }
+
+        #controls label {
+            font-weight: 600;
+            margin-left: 0.5rem;
+            color: #ddd;
+        }
+
+        #controls input[type="range"] {
+            cursor: pointer;
+            width: 120px;
+        }
+
+        /* Schalter für Anweisungen */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .3s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3B82F6;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Skript-Container */
+        #script-container {
+            padding-top: 140px; /* Platz für die Controls */
+            padding-bottom: 100vh; /* Sorgt dafür, dass man bis zum Ende scrollen kann */
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Sprecher-Text */
+        .speaker-text {
+            font-size: 2.25rem; /* 36px - wird durch JS gesteuert */
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        /* Regieanweisungen */
+        .instruction {
+            font-size: 1.125rem; /* 18px */
+            color: #FFD700; /* Gold/Gelb */
+            font-style: italic;
+            background-color: #2a2a2a;
+            border-left: 4px solid #FFD700;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            opacity: 0.9;
+        }
+
+        /* Zeitstempel / Folienüberschriften */
+        .timestamp {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            color: #3B82F6; /* blue-600 */
+            border-top: 2px solid #444;
+            padding-top: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Zustand, wenn Anweisungen ausgeblendet sind */
+        body.hide-instructions .instruction {
+            display: none;
+        }
+    </style>
+</head>
+<body class="">
+
+    <!-- STEUERLEISTE -->
+    <div id="controls">
+        <button id="play-pause-btn">Play</button>
+        <button id="reset-btn">Reset</button>
+
+        <label for="speed-slider">Tempo:</label>
+        <input type="range" id="speed-slider" min="1" max="100" value="20">
+        
+        <label for="fontsize-slider">Schriftgröße:</label>
+        <input type="range" id="fontsize-slider" min="20" max="80" value="36">
+
+        <label for="toggle-instructions">Anweisungen ausblenden:</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggle-instructions">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <!-- TELEPROMPTER SKRIPT-INHALT -->
+    <div id="script-container">
+
+        <h2 class="timestamp">0:00 – 0:05 | START – MIT VOLLEM TEMPO UND EINLEITUNG</h2>
+        <p class="instruction">(Kamera an, kurzer Beat, Logo poppt rein. Grafik: US-Flagge vs. Kolumbien-Flagge, mit “Sanktionen-Alarm!”-Text)</p>
+        <p class="speaker-text">
+            „Hallo zusammen, willkommen bei TranslatedPress DE LIVE! Ich bin [Dein Name], und heute haben wir ein echtes Erdbeben in der Weltpolitik: Kolumbiens Präsident Gustavo Petro ist auf der CLINTON-LISTE! Ja, ihr hört richtig – der erste linke Präsident Kolumbiens wird vom US-Finanzministerium wie ein Drogenbaron behandelt. Und nicht nur er: Seine Frau, sein Sohn und sein Innenminister sind auch dran.
+            <br><br>
+            Das ist kein Witz, Leute. Wir reden von Sanktionen gegen einen demokratisch gewählten Präsidenten eines Landes, das seit Jahrzehnten US-Verbündeter ist. Warum? Weil die USA sagen: Petro lässt die Drogenkartelle wachsen. Aber ist das die Wahrheit, oder ist das politische Rache von Trump?
+            <br><br>
+            Heute machen wir das volle Programm:
+            <br>
+            Live-Übersetzungen der offiziellen US-Dokumente und Petros Reden.
+            <br>
+            Tiefe Analysen zur Geschichte der Clinton-Liste, Petros Biografie und den US-Kolumbien-Beziehungen.
+            <br>
+            Statistiken zu Kokain-Produktion – frisch aus UN-Berichten.
+            <br>
+            Diskussion über Medien-Schweigen – warum hört man nichts in den großen Zeitungen?
+            <br>
+            Auswirkungen auf uns in Europa – Drogen, Wirtschaft, Flüchtlinge.
+            <br>
+            Und viel Chat-Interaktion: Umfragen, Fragen, eure Meinungen!
+            <br><br>
+            Erste Umfrage läuft schon: „Sind die Sanktionen gerecht oder nur Rache?“ Schaut in den Chat – haut eure Gedanken rein! Wir haben heute extra Zeit, weil das Thema so riesig ist. Lasst uns starten – Bildschirm an!“
+        </p>
+        <p class="instruction">(Paus: 10 Sekunden für Chat-Kommentare. Wortanzahl hier: ca. 250)</p>
+
+
+        <h2 class="timestamp">0:05 – 0:15 | DIE STORY IN DETAIL: CHRONOLOGIE UND HINTERGRUND</h2>
+        <p class="instruction">(Grafik: Erweiterter Zeitstrahl – mit Fotos von Petro, Trump, Karten von Kolumbien. Füge Statistiken ein)</p>
+        <p class="speaker-text">
+            „Bevor wir in die Übersetzungen springen, lasst uns die Story von Anfang an aufrollen. Das ist wichtig, weil das nicht aus dem Nichts kommt – das ist der Höhepunkt einer langen Fehde.
+            <br><br>
+            Zuerst mal: Wer ist Gustavo Petro eigentlich? Geboren 1960 in einer kleinen Stadt in Kolumbien, kommt er aus einfachen Verhältnissen. Als Teenager schließt er sich der M-19-Guerrilla an – das war eine linke Rebellengruppe in den 70er und 80er Jahren, die gegen die korrupte Regierung kämpfte. Petro wurde gefoltert, saß im Gefängnis, aber nach der Amnestie 1990 wird er Politiker. Er war Abgeordneter, Senator, Bürgermeister von Bogotá und jetzt seit 2022 erster linker Präsident Kolumbiens. Sein Motto: ‘Totaler Frieden’ – Verhandlungen mit Rebellen statt Krieg, und weg vom alten ‘War on Drugs’-Modell.
+            <br><br>
+            Aber das passt den USA nicht. Schaut her: Die US-Kolumbien-Beziehungen gehen zurück bis in die 80er. Damals startet Präsident Reagan den ‘War on Drugs’, und Kolumbien wird zum Schlachtfeld. 1999 kommt Plan Colombia – Milliarden US-Dollar für Militärhilfe, um Kokaplanten zu zerstören. Bis heute hat die USA über 10 Milliarden investiert, aber was ist das Ergebnis? Kokain-Produktion boomt! Laut UNODC-Bericht von 2024: In Kolumbien wuchsen 2023 253.000 Hektar Koka – 10% mehr als 2022. Potenzielle Kokain-Produktion: 2.664 Tonnen, ein Plus von 53%! Und 2024? Die Regierung hat schon 604 Tonnen Kokain beschlagnahmt – Rekord!
+            <br><br>
+            Jetzt die Eskalation: September 2025 – Petro verliert sein US-Visum nach einer UN-Rede, wo er Trump ‘Genozid in Gaza’ vorwirft und US-Soldaten aufruft, Befehle zu verweigern. Dann Oktober: US-Schiffe versenken Boote vor Kolumbiens Küste – offiziell gegen Drogen, aber Kolumbien sagt: ‘Das sind Fischer, das ist Mord!’ Mindestens 37 Tote. Petro protestiert laut. Am 19. Oktober stoppt Trump alle Hilfen – 377 Millionen Dollar pro Jahr! Und droht mit 50% Zöllen auf kolumbianische Waren.
+            <br><br>
+            Unser Video vom 20. Oktober hat das schon übersetzt: Trump nennt Petro einen ‘illegalen Drogenführer’. Und dann der Hammer: 24. Oktober 2025 – das US-Finanzministerium setzt Petro, seine Frau Verónica Alcocer, Sohn Nicolás und Innenminister Armando Benedetti auf die Clinton-Liste. Das ist historisch – vergleichbar mit Sanktionen gegen Maduro in Venezuela 2019, aber Maduro ist kein US-Verbündeter.
+            <br><br>
+            Karte einblenden: Seht die roten Zonen – das sind die Kokaregionen in Kolumbien. Petro will da mit Sozialprogrammen helfen, nicht mit Gift sprühen. Aber die USA sagen: ‘Du lässt Kartelle wachsen!’ Ist das fair? Lasst es uns im Chat diskutieren.“
+        </p>
+        <p class="instruction">(Pause: 20 Sekunden für Chat. Umfrage-Update: ‘Bisher 60% sagen Rache!’ Wortanzahl hier: ca. 550, gesamt 800)</p>
+
+        
+        <h2 class="timestamp">0:15 – 0:30 | LIVE-ÜBERSETZUNG: US-FINANZMINISTERIUM – MIT TIEFER ANALYSE</h2>
+        <p class="instruction">(Originaldokument auf Bildschirm + deutsche Untertitel live einblenden. Füge Zitate und Erklärungen ein)</p>
+        <p class="speaker-text">
+            „Okay, jetzt zum Kern: Die offizielle US-Pressemitteilung vom 24. Oktober 2025. Ich übersetze live, Schritt für Schritt, und erkläre, was das bedeutet. Das Dokument kommt vom Office of Foreign Assets Control (OFAC) – das ist die US-Behörde für Sanktionen.
+            <br><br>
+            „Heute hat das US-Finanzministerium Präsident Gustavo Petro… auf die SDN-Liste gesetzt…“
+            <br>
+            Übersetzung: „Heute hat das US-Finanzministerium Präsident Petro auf die Schwarze Liste gesetzt…“
+            <br><br>
+            „…weil er nichts unternommen hat, um den Drogenhandel zu stoppen. Seit Petro Präsident ist, explodiert die Kokain-Produktion auf Rekordniveau.“
+            <br>
+            Übersetzung: „…weil er nichts getan hat, um den Drogenhandel zu stoppen. Seit Petro Präsident ist, explodiert die Kokain-Produktion auf Rekordniveau.“
+            <br><br>
+            Lasst uns das aufbrechen: Die USA zitieren UN-Zahlen – ja, 2.664 Tonnen potenziell 2023. Aber wisst ihr, dass unter dem rechten Vorgänger Duque die Produktion auch stieg? Von 2018 bis 2022: Plus 43%! Also, ist das wirklich Petros Schuld? Oder liegt’s am ‘War on Drugs’-Versagen? Seit Nixon 1971 hat die USA Milliarden ausgegeben – und Kokain ist billiger als je.
+            <br><br>
+            Weiter:
+            <br>
+            „Kokain flutet die USA und vergiftet Amerikaner. Petro weigert sich, mit uns zusammenzuarbeiten.“
+            <br>
+            Übersetzung: „Kokain flutet die USA und vergiftet Amerikaner. Petro weigert sich, mit uns zusammenzuarbeiten.“
+            <br><br>
+            Sekretär Scott Bessent sagt: ‘Petro lässt Kartelle blühen.’ Aber Petro hat 2024 mehr Kokain beschlagnahmt als je – 626 Tonnen! Und seine ‘Total Peace’-Politik: Verhandlungen mit ELN und Clan del Golfo, um den Krieg zu beenden. Kritiker sagen: ‘Das ist Appeasement.’ Aber historisch: Plan Colombia hat 2 Millionen Menschen vertrieben, ohne Drogen zu stoppen.
+            <br><br>
+            Nun zur Familie:
+            <br>
+            „Auch First Lady Verónica Alcocer, Sohn Nicolás Petro Burgos und Armando Benedetti – wegen Unterstützung des Versagens.“
+            <br>
+            Übersetzung: „Auch die First Lady, der Sohn und der Innenminister – weil sie das mitgemacht haben.“
+            <br><br>
+            Hintergrund: Nicolás Petro wurde 2023 verhaftet – Geldwäsche aus Kampagnengeldern, angeblich von Drogenhändlern. Er sitzt unter Hausarrest, und der Prozess läuft. Seine Ex-Frau Daysuris Vásquez hat ihn angeklagt, dass er 200 Millionen Pesos (ca. 50.000 Euro) von dubiosen Quellen nahm. Petro Senior sagt: ‘Ich wusste nichts davon.’ Aber die USA nutzen das jetzt. Verónica Alcocer? Sie wird beschuldigt, Einfluss zu nehmen, aber keine direkten Drogen-Links. Benedetti: Skandal-umwittert, ehemaliger Botschafter.
+            <br><br>
+            Kommentar: Kein direkter Beweis gegen Petro selbst – nur ‘Untätigkeit’. Das ist neu für einen Verbündeten. Vergleich: 2019 Maduro sanktioniert – aber Venezuela ist Feind. Hier? Politisch motiviert?“
+        </p>
+        <p class="instruction">(Pause: 30 Sekunden. Chat-Frage: ‘Wer kennt mehr zu Nicolás?’ Wortanzahl hier: ca. 650, gesamt 1450)</p>
+
+        
+        <h2 class="timestamp">0:30 – 0:45 | PETRO SCHLÄGT ZURÜCK – LIVE-ÜBERSETZUNG UND BIO-VERGLEICH</h2>
+        <p class="instruction">(Clip: Petro vor Menge – Untertitel live. Füge Biografie-Details ein)</p>
+        <p class="speaker-text">
+            „Jetzt hört Petro selbst – seine Rede vom 26. Oktober auf dem Bolívar-Platz, vor 50.000 Leuten. Ich übersetze und analysiere.
+            <br><br>
+            „Das ist politische Erpressung durch die Mafia! Wir haben Jahrzehnte gekämpft – und jetzt bestraft man uns, weil wir Frieden wollen?“
+            <br>
+            Übersetzung: „Das ist politische Erpressung durch die Mafia! Wir haben Jahrzehnte gekämpft – und jetzt Strafe, weil wir Frieden wollen?“
+            <br><br>
+            Petro meint die US-‘Mafia’ – Trump und Co. Erinnert euch: Als Guerrillero kämpfte er gegen Drogen-Paramilitärs. Als Senator enthüllte er Korruption. Jetzt als Präsident: Er will Koka-Bauern helfen, statt sie zu bombardieren.
+            <br><br>
+            Weiter:
+            <br>
+            „Die USA fordern: Stoppt die Produktion – aber sie stoppen nicht den Konsum! Wir haben Milliarden bekommen, und nichts hat sich geändert.“
+            <br>
+            Übersetzung: „USA fordern: Stoppt die Produktion – aber sie stoppen nicht den Konsum! Wir haben Milliarden bekommen, und nichts hat sich geändert.“
+            <br><br>
+            Richtig: USA konsumieren 40% des Welt-Kokains. Und Plan Colombia? Hat Kolumbien in einen Bürgerkrieg gestürzt – 9 Millionen Opfer seit 1960. Petro will umdenken: Legalisiere Koka-Blatt (wie in Bolivien), investiere in Bildung. Aber Trump will ‘hart durchgreifen’.
+            <br><br>
+            Mehr aus der Rede: Petro hat Anwalt Dan Kovalik engagiert – der kämpft gegen die Sanktionen. Er sagt: ‘Das ist Angriff auf die Souveritänität.’ Und Kolumbien? Die Wirtschaft leidet: Peso fällt, Investoren fliehen. Bis 2026 (Ende seiner Amtszeit) könnte das Chaos verursachen.“
+        </p>
+        <p class="instruction">(Pause: 20 Sekunden. Umfrage: ‘Unterstützt ihr Petros Friedenspolitik?’ Wortanzahl hier: ca. 400, gesamt 1850)</p>
+
+        
+        <h2 class="timestamp">0:45 – 1:00 | WAS IST DIE CLINTON-LISTE? GESCHICHTE UND BEISPIELE</h2>
+        <p class="instruction">(Grafik: Timeline Clinton-Liste, Beispiele wie El Chapo, Maduro. Erweitere mit Geschichte)</p>
+        <p class="speaker-text">
+            „Viele fragen im Chat: Was ist diese Clinton-Liste genau? Lasst uns das aufklären – mit Geschichte.
+            <br><br>
+            Die Liste heißt offiziell Specially Designated Nationals (SDN) List vom OFAC. Begonnen 1995 unter Bill Clinton mit dem ‘Kingpin Act’ gegen Drogenkartelle. Ziel: Vermögen einfrieren, Geschäfte verbieten. Heute: Über 10.000 Namen – von Terroristen bis Firmen. In Kolumbien: Seit 1990er Tausende, z.B. Pablo Escobar-Nachfolger, korrupte Politiker. 2014: 904 Seiten nur Kolumbianer!
+            <br><br>
+            Beispiele: El Chapo Guzmán 2001 drauf – mexikanischer Boss. Maduro 2019 – wegen Drogen und Korruption. Effekt: Kein US-Business, Reisen verboten. Aber rauskommen? Möglich, mit Beweisen – wie einige Kolumbianer nach Verhandlungen.
+            <br><br>
+            Für Petro: Er sagt ‘Kein US-Vermögen’, aber Familie? Sohn Nicolás hatte Skandale – 2023 Verhaftung, Geld von Drogenhändlern. Das nutzen die USA. Ist das fair? Oder nur, weil Petro Trump kritisiert?“
+        </p>
+        <p class="instruction">(Pause: 15 Sekunden. Wortanzahl hier: ca. 300, gesamt 2150)</p>
+
+        
+        <h2 class="timestamp">1:00 – 1:15 | DAS MEDIEN-SCHWEIGEN – COVER-UP ODER NORMAL?</h2>
+        <p class="instruction">(Grafik: Medien-Logos mit ‘0 Artikel’. Erweitere mit Beispielen aus Suche)</p>
+        <p class="speaker-text">
+            „Jetzt der Skandal: Warum schweigen die großen Medien? NYT: Nur ein kleiner Artikel. Economist: Nichts Neues. BBC, CNN: Kurze Meldungen.
+            <br><br>
+            Beispiele aus Geschichte: Bei Sanktionen gegen Maduro 2019 – Titelseiten überall. Bei Iran 2025 – große Berichte. Aber hier? Vielleicht weil’s Trump ist – Medien wollen neutral bleiben. Oder News-Überflutung: Gaza, Ukraine. Spanische Medien: Explodieren! El Tiempo: ‘Imperialismus!’
+            <br><br>
+            Ist das Zensur? Oder Prioritäten? Im Chat: Viele sagen ‘Ja!’“
+        </p>
+        <p class="instruction">(Pause: 20 Sekunden. Umfrage: ‘Zensur?’ Wortanzahl hier: ca. 200, gesamt 2350)</p>
+
+        
+        <h2 class="timestamp">1:15 – 1:30 | WAS BEDEUTET DAS FÜR EUROPA UND DEUTSCHLAND?</h2>
+        <p class="instruction">(Karte: Drogen-Routen, Statistiken)</p>
+        <p class="speaker-text">
+            „Warum uns? 80% EU-Kokain aus Kolumbien – Preise fallen. Wenn Kolumbien kippt: Mehr Flüchtlinge, höhere Preise für Kaffee. Trump-Zölle: Trifft deutsche Firmen. Das ist global!“
+        </p>
+        <p class="instruction">(Pause: 15 Sekunden. Wortanzahl hier: ca. 150, gesamt 2500)</p>
+
+        
+        <h2 class="timestamp">1:30 – ENDE | FRAGEN AUS DEM CHAT + ABSCHLUSS</h2>
+        <p class="speaker-text">
+            „Jetzt eure Fragen! [Beantworte 5–10 live]. Danke! Abonniert, Telegram joinen. Bis nächstes Mal!“
+        </p>
+        <p class="instruction">(Outro: Musik, Quellen. Gesamtwortanzahl: ca. 2500)</p>
+
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const speedSlider = document.getElementById('speed-slider');
+            const fontsizeSlider = document.getElementById('fontsize-slider');
+            const toggleInstructionsBtn = document.getElementById('toggle-instructions');
+            const scriptContainer = document.getElementById('script-container');
+            const speakerTexts = document.querySelectorAll('.speaker-text');
+
+            let isScrolling = false;
+            let scrollSpeed = 0.5; // Entspricht dem Standardwert 20 des Sliders / 40
+            let animationFrameId = null;
+
+            // Scroll-Funktion
+            function scroll() {
+                if (!isScrolling) {
+                    return;
+                }
+                window.scrollBy(0, scrollSpeed);
+                animationFrameId = requestAnimationFrame(scroll);
+            }
+
+            // Play/Pause-Button
+            playPauseBtn.addEventListener('click', () => {
+                isScrolling = !isScrolling;
+                if (isScrolling) {
+                    playPauseBtn.textContent = 'Pause';
+                    scroll();
+                } else {
+                    playPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            });
+
+            // Reset-Button
+            resetBtn.addEventListener('click', () => {
+                window.scrollTo(0, 0);
+                if (isScrolling) {
+                    isScrolling = false;
+                    playPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            });
+
+            // Geschwindigkeitsregler
+            speedSlider.addEventListener('input', (e) => {
+                // Skalieren des Werts für eine angenehme Geschwindigkeit
+                scrollSpeed = parseFloat(e.target.value) / 40; 
+            });
+
+            // Schriftgrößenregler
+            fontsizeSlider.addEventListener('input', (e) => {
+                const newSize = e.target.value + 'px';
+                // Wenden Sie die neue Größe auf alle Sprechertexte an
+                speakerTexts.forEach(textEl => {
+                    textEl.style.fontSize = newSize;
+                });
+            });
+
+            // Anweisungen ein-/ausblenden
+            toggleInstructionsBtn.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.body.classList.add('hide-instructions');
+                } else {
+                    document.body.classList.remove('hide-instructions');
+                }
+            });
+
+            // Standard-Scroll-Geschwindigkeit beim Laden festlegen
+            scrollSpeed = parseFloat(speedSlider.value) / 40;
+            
+            // Standard-Schriftgröße beim Laden festlegen
+            const initialFontSize = fontsizeSlider.value + 'px';
+            speakerTexts.forEach(textEl => {
+                textEl.style.fontSize = initialFontSize;
+            });
+        });
+    </script>
+
+</body>
+</html>
+

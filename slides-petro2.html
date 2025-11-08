@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Präsentation: Clinton-Petro Skandal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #F9FAFB; /* text-gray-50 */
+            overflow: hidden; /* Verhindert Scrollen */
+        }
+
+        #presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 5% 8%; /* Mehr Padding für besseres Layout */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            visibility: hidden;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        /* Stile für die animierten Elemente */
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition-delay: 0s; /* Wird durch JS überschrieben */
+        }
+
+        .reveal-item.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Akzentfarben aus den Designvorschlägen */
+        .text-accent-red {
+            color: #EF4444; /* red-500 */
+        }
+        .text-accent-blue {
+            color: #3B82F6; /* blue-500 */
+        }
+
+        /* Steuerung und Fortschrittsbalken */
+        #controls-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1F2937; /* bg-gray-800 */
+            z-index: 100;
+        }
+
+        #progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #374151; /* bg-gray-700 */
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #3B82F6; /* bg-blue-500 */
+            transition: width 0.1s linear;
+        }
+
+        #controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #F9FAFB; /* text-gray-50 */
+            cursor: pointer;
+            padding: 8px 12px;
+            margin: 0 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: #374151; /* bg-gray-700 */
+        }
+        
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            pointer-events: none; /* Stellt sicher, dass Klicks auf das SVG an den Button gehen */
+        }
+
+        /* Bild-Container */
+        .image-container {
+            max-width: 450px; /* Begrenzt die Bildgröße */
+            width: 100%;
+            margin-top: 1.5rem; /* mt-6 */
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px; /* rounded-xl */
+            border: 2px solid #374151; /* border-gray-700 */
+            cursor: zoom-in; /* <<< MODIFICACIÓN: Añadido cursor */
+        }
+
+        /* Layout-Anpassung für Folien mit Bild */
+        .slide-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            /* Zweispaltiges Layout für größere Bildschirme */
+            .slide-layout {
+                flex-direction: row;
+                gap: 2rem; /* gap-8 */
+            }
+            .slide-layout .content {
+                flex-basis: 50%;
+                text-align: left;
+            }
+            .slide-layout .image-container {
+                flex-basis: 50%;
+                margin-top: 0;
+            }
+            ul {
+                padding-left: 1.5rem; /* pl-6 */
+            }
+        }
+
+        /* --- NUEVO: ESTILOS DEL LIGHTBOX --- */
+        .lightbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none; /* Oculto por defecto */
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+        #lightbox-image {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            border: 2px solid #F9FAFB;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #F9FAFB;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        /* --- FIN DE ESTILOS DEL LIGHTBOX --- */
+
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        
+        <div class="slide active" data-duration="300"> <div class="slide-layout">
+                <div class="content">
+                    <h1 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">LIVE: Clinton-Liste gegen Petro – Skandal in Bogotá!</h1>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">Gustavo Petro sanktioniert: Warum?</li>
+                        <li class="reveal-item text-accent-blue">Live-Übersetzungen & Analyse</li>
+                        <li class="reveal-item">Umfrage: “Gerecht oder Rache?”</li>
+                        <li class="reveal-item">Chat: Teilt eure Meinungen!</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-1.jpg" alt="Gustavo Petro bei einer Kundgebung in Kolumbien">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="300"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Wer ist Gustavo Petro?</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">Geboren 1960, Ex-Guerrillero (M-19)</li>
+                        <li class="reveal-item">Erster linker Präsident seit 2022</li>
+                        <li class="reveal-item text-accent-blue">“Totaler Frieden”: Verhandlungen statt Krieg</li>
+                        <li class="reveal-item">US-Beziehungen: Plan Colombia – Milliarden-Hilfe</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-2.jpg" alt="Donald Trump droht mit Sanktionen">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="300"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Die Eskalation: September bis Oktober 2025</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">Sept: Visum-Verlust nach UN-Rede</li>
+                        <li class="reveal-item">Okt: US-Schiffe versenken Boote (37 Tote)</li>
+                        <li class="reveal-item">Okt: Hilfen gestoppt, 50% Zölle</li>
+                        <li class="reveal-item">Okt: Clinton-Liste</li>
+                        <li class="reveal-item text-accent-blue">Statistik: Kokain-Produktion: 2.664 Tonnen (UNODC 2024)</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-3.png" alt="Karte Kolumbiens mit Kokaanbaugebieten">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="600"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">US-Treasury: Die Anklage gegen Petro</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">“Nichts gegen Drogen getan” – Rekord-Produktion</li>
+                        <li class="reveal-item">Familie: Frau, Sohn (Geldwäsche), Benedetti</li>
+                        <li class="reveal-item">Kein direkter Beweis, nur Untätigkeit</li>
+                        <li class="reveal-item">Vergleich: Duque-Zeit +43% Steigerung</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-4.png" alt="US Treasury SDN-Liste Dokument">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="300"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Kokain-Boom: Fakten & Zahlen</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">2023: 253.000 Hektar Koka (+10%)</li>
+                        <li class="reveal-item">2024: 626 Tonnen beschlagnahmt (Rekord)</li>
+                        <li class="reveal-item">US-Konsum: 40% weltweit</li>
+                        <li class="reveal-item text-accent-red">“War on Drugs”-Versagen seit 1971</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-5.png" alt="Graph der Kokain-Produktion in Kolumbien">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="600"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Petro schlägt zurück: Bolívar-Platz-Rede</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">“Erpressung durch die Mafia!”</li>
+                        <li class="reveal-item">“USA: Stoppt Konsum, nicht nur Produktion”</li>
+                        <li class="reveal-item">Anwalt engagiert: Dan Kovalik</li>
+                        <li class="reveal-item">Wirtschaft: Peso fällt, Investoren fliehen</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-6.jpg" alt="Illustration von Medien-Zensur">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="900"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Die Clinton-Liste: Geschichte & Effekte</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">1995: Kingpin Act unter Clinton</li>
+                        <li class="reveal-item">Über 10.000 Namen (z. B. El Chapo 2001, Maduro 2019)</li>
+                        <li class="reveal-item">Effekte: Vermögen einfrieren, Reiseverbot</li>
+                        <li class="reveal-item">Kolumbien: Tausende Einträge seit 90er</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-7.jpg" alt="Mugshot von El Chapo als Clinton-List-Beispiel">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="900"> <div class="slide-layout">
+                <div class="content">
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Medien-Schweigen: Zensur oder Überflutung?</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                        <li class="reveal-item">NYT: Nur Seite A10</li>
+                        <li class="reveal-item">Economist/BBC: Kaum Berichte</li>
+                        <li class="reveal-item text-accent-red">Spanische Medien: Explosion!</li>
+                        <li class="reveal-item">Gründe: News-Überflutung, Angst vor Trump</li>
+                    </ul>
+                </div>
+                <div class="reveal-item image-container">
+                    <img src="slide-8.png" alt="Kokain-Schmuggelrouten von Kolumbien nach Europa">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-duration="900"> <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Was bedeutet das für uns in Europa?</h2>
+            <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto">
+                <li class="reveal-item">80% EU-Kokain aus Kolumbien</li>
+                <li class="reveal-item">Preis: 60€/Gramm in Berlin</li>
+                <li class="reveal-item">Flüchtlinge, Zölle: Deutsche Firmen betroffen</li>
+                <li class="reveal-item text-accent-blue">Global: Machtpolitik USA</li>
+            </ul>
+        </div>
+
+        <div class="slide" data-duration="1800"> <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Eure Fragen & Fazit</h2>
+            <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto">
+                <li class="reveal-item">Chat-Fragen live beantworten</li>
+                <li class="reveal-item text-accent-red">Abonniert für mehr!</li>
+                <li class="reveal-item">Nächstes Live: Trump-Zölle?</li>
+                <li class="reveal-item">Danke & Quellen</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div id="controls-wrapper">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="controls">
+            <button id="prev-btn" class="control-btn" aria-label="Vorherige Folie">
+                <svg fill="currentColor" viewBox="0 0 20 20"><path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"></path></svg>
+            </button>
+            <button id="play-pause-btn" class="control-btn" aria-label="Wiedergabe starten/pausieren">
+                <svg id="play-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M4.018 15.59a1.5 1.5 0 002.124.22l11.16-9.21A1.5 1.5 0 0015.96 4H4.04C2.92 4 2.01 4.87 2.01 6v8a1.5 1.5 0 002.008 1.59z"></path></svg>
+                <svg id="pause-icon" fill="currentColor" viewBox="0 0 20 20" style="display: none;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+            </button>
+            <button id="next-btn" class="control-btn" aria-label="Nächste Folie">
+                <svg fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox-overlay">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-image" src="" alt="Vergrößerte Ansicht">
+    </div>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            const progressBar = document.getElementById('progress-bar');
+
+            // --- NUEVO: LÓGICA DEL LIGHTBOX ---
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightbox-image');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            const slideImages = document.querySelectorAll('.image-container img');
+
+            /**
+             * Abre el lightbox con la imagen especificada.
+             */
+            function openLightbox(src) {
+                lightboxImage.src = src;
+                lightbox.style.display = 'flex';
+                // Pausar la presentación si se está reproduciendo
+                if (isPlaying) {
+                    pauseSlideTimer();
+                }
+            }
+
+            /**
+             * Cierra el lightbox.
+             */
+            function closeLightbox() {
+                lightbox.style.display = 'none';
+                lightboxImage.src = '';
+            }
+
+            // Asignar eventos a todas las imágenes de las diapositivas
+            slideImages.forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evita que el clic se propague
+                    openLightbox(img.src);
+                });
+            });
+
+            // Eventos para cerrar el lightbox
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                // Cerrar solo si se hace clic en el fondo (overlay)
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+            // --- FIN DE LÓGICA DEL LIGHTBOX ---
+
+
+            let currentSlide = 0;
+            let isPlaying = false;
+            let slideTimer = null; // Für setTimeout des Folienwechsels
+            let progressInterval = null; // Für setInterval der Fortschrittsanzeige
+            let slideStartTime = 0;
+            let remainingTime = 0;
+
+            // --- HINWEIS ---
+            // Dies ist die Demo-Dauer für einen schnellen Test (10 Sekunden).
+            const DEMO_DURATION_MS = 10000;
+            // Um die realen Zeiten aus Ihrem Dokument zu verwenden,
+            // lesen Sie 'data-duration' aus und multiplizieren Sie mit 1000.
+            // z.B.: const DURATION_MS = slides[currentSlide].dataset.duration * 1000;
+
+            function getSlideDuration(index) {
+                // Verwendet die Demo-Dauer.
+                return DEMO_DURATION_MS;
+                
+                // Um die echte Dauer zu verwenden, kommentieren Sie dies ein:
+                /*
+                const durationInSeconds = slides[index].dataset.duration;
+                return durationInSeconds ? parseInt(durationInSeconds, 10) * 1000 : 10000; // 10s Fallback
+                */
+            }
+
+            /**
+             * Zeigt die Folie mit dem angegebenen Index an und startet die Animationen.
+             */
+            function showSlide(index) {
+                // Alle Folien ausblenden
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                });
+
+                // Aktuelle Folie anzeigen
+                const slide = slides[index];
+                if (!slide) return;
+                
+                slide.classList.add('active');
+                currentSlide = index;
+
+                // Elemente nacheinander aufdecken
+                revealElements(slide);
+
+                // Timer zurücksetzen und starten, wenn die Wiedergabe aktiv ist
+                if (isPlaying) {
+                    startSlideTimer();
+                } else {
+                    // Auch im Pausenmodus den Fortschrittsbalken auf 0 setzen
+                    resetProgress();
+                }
+            }
+
+            /**
+             * Animiert die .reveal-item Elemente auf der aktuellen Folie nacheinander.
+             */
+            function revealElements(slide) {
+                const items = slide.querySelectorAll('.reveal-item');
+                const delayStep = 250; // 250ms zwischen jedem Element
+                
+                items.forEach((item, index) => {
+                    // Zuerst resetten
+                    item.classList.remove('revealed');
+                    item.style.transitionDelay = `${index * delayStep}ms`;
+                    
+                    // Timeout, um sicherzustellen, dass die Klasse nach dem Delay hinzugefügt wird
+                    setTimeout(() => {
+                        item.classList.add('revealed');
+                    }, 50); // Kleiner Puffer
+                });
+            }
+
+            /**
+             * Startet den Timer für den automatischen Folienwechsel und die Fortschrittsanzeige.
+             */
+            function startSlideTimer() {
+                const duration = getSlideDuration(currentSlide);
+                remainingTime = duration;
+                slideStartTime = Date.now();
+
+                // Timer für nächsten Folienwechsel
+                clearTimeout(slideTimer);
+                slideTimer = setTimeout(nextSlide, remainingTime);
+
+                // Intervall für Fortschrittsanzeige
+                clearInterval(progressInterval);
+                progressInterval = setInterval(updateProgress, 50);
+                
+                isPlaying = true;
+                updatePlayPauseButton();
+            }
+
+            /**
+             * Pausiert den Timer und die Fortschrittsanzeige.
+             */
+            function pauseSlideTimer() {
+                clearTimeout(slideTimer);
+                clearInterval(progressInterval);
+                
+                // Verbleibende Zeit berechnen
+                const elapsed = Date.now() - slideStartTime;
+                remainingTime = remainingTime - elapsed;
+                
+                // Sicherstellen, dass die verbleibende Zeit nicht negativ ist
+                if (remainingTime < 0) remainingTime = 0;
+
+                isPlaying = false;
+                updatePlayPauseButton();
+            }
+
+            /**
+             * Setzt die Wiedergabe fort.
+             */
+            function resumeSlideTimer() {
+                slideStartTime = Date.now(); // Startzeit für die verbleibende Dauer
+
+                clearTimeout(slideTimer);
+                slideTimer = setTimeout(nextSlide, remainingTime);
+
+                clearInterval(progressInterval);
+                progressInterval = setInterval(updateProgress, 50);
+                
+                isPlaying = true;
+                updatePlayPauseButton();
+            }
+
+            /**
+             * Umschalten zwischen Play und Pause.
+             */
+            function togglePlayPause() {
+                if (isPlaying) {
+                    pauseSlideTimer();
+                } else {
+                    // Wenn der Timer bei 0 ist (neue Folie), starte ihn neu, sonst setze ihn fort
+                    if (remainingTime <= 0 || progressBar.style.width === '0%') {
+                        startSlideTimer();
+                    } else {
+                        resumeSlideTimer();
+                    }
+                }
+            }
+
+            /**
+             * Aktualisiert die Play/Pause-Button-Icons.
+             */
+            function updatePlayPauseButton() {
+                if (isPlaying) {
+                    playIcon.style.display = 'none';
+                    pauseIcon.style.display = 'block';
+                } else {
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                }
+            }
+
+            /**
+             * Aktualisiert den Fortschrittsbalken basierend auf der vergangenen Zeit.
+             */
+            function updateProgress() {
+                const duration = getSlideDuration(currentSlide);
+                let elapsed = Date.now() - slideStartTime;
+                
+                // Wenn wir fortsetzen, müssen wir die bereits vergangene Zeit addieren
+                if (!isPlaying) {
+                    // Im Pausenmodus wird die 'elapsed' Zeit nicht neu berechnet, 
+                    // wir verwenden die Zeit beim Pausieren.
+                    elapsed = duration - remainingTime;
+                }
+                
+                let progress = (elapsed / duration) * 100;
+                
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = `${progress}%`;
+            }
+
+            /**
+             * Setzt den Fortschrittsbalken und die Timer-Variablen zurück.
+             */
+            function resetProgress() {
+                clearInterval(progressInterval);
+                clearTimeout(slideTimer);
+                progressBar.style.width = '0%';
+                remainingTime = getSlideDuration(currentSlide);
+            }
+
+            /**
+             * Geht zur nächsten Folie.
+             */
+            function nextSlide() {
+                let next = currentSlide + 1;
+                if (next >= slides.length) {
+                    next = 0; // Zurück zum Anfang
+                }
+                resetProgress();
+                showSlide(next);
+            }
+
+            /**
+             * Geht zur vorherigen Folie.
+             */
+            function prevSlide() {
+                let prev = currentSlide - 1;
+                if (prev < 0) {
+                    prev = slides.length - 1; // Zur letzten Folie
+                }
+                resetProgress();
+                // Beim manuellen Wechsel immer pausieren
+                if(isPlaying) {
+                    pauseSlideTimer();
+                }
+                showSlide(prev);
+            }
+
+            // Event Listeners
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            
+            // Tastatursteuerung
+            document.addEventListener('keydown', (e) => {
+                // --- MODIFICACIÓN: Añadir control de Escape y bloquear controles ---
+                // Si el lightbox está abierto, solo escucha 'Escape'
+                if (lightbox.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    }
+                    return; // Ignora otras teclas (flechas, espacio)
+                }
+                // --- FIN DE MODIFICACIÓN ---
+
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === ' ') { // Leertaste für Play/Pause
+                    e.preventDefault(); // Verhindert Scrollen
+                    togglePlayPause();
+                }
+            });
+
+            // Initiale Folie anzeigen
+            showSlide(0);
+            resetProgress(); // Stellt sicher, dass der Balken bei 0 beginnt
+        });
+    </script>
+
+</body>
+</html>
