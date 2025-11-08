@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presenter View: (TU TÍTULO AQUÍ)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #111;
+            font-family: 'Inter', sans-serif;
+            color: #f0f0f0;
+        }
+
+        #slide-pane {
+            flex: 1 1 65%; 
+            height: 100vh;
+            position: relative;
+            background-color: #111827;
+        }
+
+        #tp-pane {
+            flex: 1 1 35%; 
+            height: 100vh;
+            position: relative;
+            overflow-y: scroll;
+            border-left: 2px solid #555;
+            background-color: #111;
+        }
+        
+        body.hide-instructions .instruction {
+            display: none;
+        }
+
+        /* --- ESTILOS DE SLIDES (Panel Izquierdo) --- */
+        #presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%; 
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 5% 8%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            visibility: hidden;
+        }
+        .slide.active { opacity: 1; transform: translateX(0); visibility: visible; }
+
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition-delay: 0s;
+        }
+        .reveal-item.revealed { opacity: 1; transform: translateY(0); }
+
+        .text-accent-red { color: #EF4444; }
+        .text-accent-blue { color: #3B82F6; }
+
+        #controls-wrapper {
+            position: absolute; 
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1F2937; 
+            z-index: 100;
+        }
+        
+        #slide-pane #controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #F9FAFB;
+            cursor: pointer;
+            padding: 8px 12px;
+            margin: 0 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .control-btn:hover { background-color: #374151; }
+        .control-btn svg { width: 24px; height: 24px; pointer-events: none; }
+
+        .image-container {
+            max-width: 450px;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 2px solid #374151;
+            cursor: zoom-in;
+        }
+
+        .slide-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .slide-layout { flex-direction: row; gap: 2rem; }
+            .slide-layout .content { flex-basis: 50%; text-align: left; }
+            .slide-layout .image-container { flex-basis: 50%; margin-top: 0; }
+            #slide-pane ul { padding-left: 1.5rem; }
+        }
+
+        .lightbox-overlay {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000; 
+            cursor: zoom-out;
+        }
+        #lightbox-image {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            border: 2px solid #F9FAFB;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #F9FAFB;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* --- ESTILOS DE TELEPROMPTER (Panel Derecho) --- */
+        
+        #tp-pane #controls {
+            position: sticky; 
+            bottom: 0; 
+            left: 0;
+            right: 0;
+            background-color: #222;
+            border-top: 2px solid #3B82F6;
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1000;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #tp-pane #controls button {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #tp-pane #controls button:hover { background-color: #2563EB; }
+
+        #tp-pane #controls label {
+            font-weight: 600;
+            margin-left: 0.5rem;
+            color: #ddd;
+        }
+        #tp-pane #controls input[type="range"] { cursor: pointer; width: 120px; }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .3s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #3B82F6; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        #script-container {
+            padding: 1rem 2rem; 
+            padding-bottom: 100vh; 
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .speaker-text {
+            font-size: 2.25rem; 
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .instruction {
+            font-size: 1.125rem; 
+            color: #FFD700;
+            font-style: italic;
+            background-color: #2a2a2a;
+            border-left: 4px solid #FFD700;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            opacity: 0.9;
+        }
+
+        .timestamp {
+            font-size: 1.25rem; 
+            font-weight: 600;
+            color: #3B82F6;
+            border-top: 2px solid #444;
+            padding-top: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+    </style>
+</head>
+<body class="">
+
+    <div id="slide-pane">
+        
+        <div id="presentation-container">
+            
+            <div class="slide active" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h1 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">TU TÍTULO PRINCIPAL AQUÍ</h1>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">Punto clave 1</li>
+                            <li class="reveal-item text-accent-blue">Punto clave 2 (con acento)</li>
+                            <li class="reveal-item">Punto clave 3</li>
+                            <li class="reveal-item">Punto clave 4</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-1.jpg" alt="Descripción de la imagen 1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Sección 2: Quién/Qué</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">Dato 1</li>
+                            <li class="reveal-item">Dato 2</li>
+                            <li class="reveal-item text-accent-blue">Dato 3 (con acento)</li>
+                            <li class="reveal-item">Dato 4</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-2.jpg" alt="Descripción de la imagen 2">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Sección 3: El Problema</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">Punto 1</li>
+                            <li class="reveal-item">Punto 2</li>
+                            <li class="reveal-item">Punto 3</li>
+                            <li class="reveal-item">Punto 4</li>
+                            <li class="reveal-item text-accent-blue">Dato Clave (con acento)</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-3.png" alt="Descripción de la imagen 3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="900"> 
+                <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Diapositiva sin Imagen</h2>
+                <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto">
+                    <li class="reveal-item">Este slide no tiene un div 'image-container'.</li>
+                    <li class="reveal-item">El contenido se centra automáticamente.</li>
+                    <li class="reveal-item">Es útil para conclusiones o listas largas.</li>
+                </ul>
+            </div>
+
+            <div class="slide" data-duration="1800"> 
+                <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Preguntas y Conclusión</h2>
+                <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto">
+                    <li class="reveal-item">Preguntas del chat</li>
+                    <li class="reveal-item text-accent-red">Llamado a la acción (Suscríbete)</li>
+                    <li class="reveal-item">Gracias</li>
+                </ul>
+            </div>
+
+            </div>
+
+        <div id="controls-wrapper">
+            <div id="controls">
+                <button id="prev-btn" class="control-btn" aria-label="Vorherige Folie">
+                    <svg fill="currentColor" viewBox="0 0 20 20"><path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"></path></svg>
+                </button>
+                <button id="next-btn" class="control-btn" aria-label="Nächste Folie">
+                    <svg fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="lightbox" class="lightbox-overlay">
+            <span class="lightbox-close">&times;</span>
+            <img id="lightbox-image" src="" alt="Vergrößerte Ansicht">
+        </div>
+
+    </div>
+
+    <div id="tp-pane">
+        
+        <div id="script-container">
+
+            <h2 class="timestamp">0:00 – 0:05 | TU PRIMERA SECCIÓN</h2>
+            <p class="instruction">(Instrucción de cámara/gráfico)</p>
+            <p class="speaker-text">
+                Tu primer bloque de texto del guion va aquí.
+                <br><br>
+                Puedes añadir saltos de línea con la etiqueta &lt;br&gt; para crear pausas visuales.
+            </p>
+            <p class="instruction">(Instrucción de pausa o chat)</p>
+
+
+            <h2 class="timestamp">0:05 – 0:15 | TU SEGUNDA SECCIÓN</h2>
+            <p class="instruction">(Mostrar gráfico 2)</p>
+            <p class="speaker-text">
+                Tu segundo bloque de texto del guion.
+                <br><br>
+                Este texto se desplazará automáticamente cuando presiones 'Play' o la barra espaciadora.
+            </p>
+
+            <h2 class="timestamp">1:30 – ENDE | PREGUNTAS Y CIERRE</h2>
+            <p class="speaker-text">
+                Texto de cierre.
+            </p>
+
+        </div>
+        <div id="controls">
+            <button id="play-pause-btn">Play</button>
+            <button id="reset-btn">Reset</button>
+
+            <label for="speed-slider">Tempo:</label>
+            <input type="range" id="speed-slider" min="1" max="100" value="20">
+            
+            <label for="fontsize-slider">Schriftgröße:</label>
+            <input type="range" id="fontsize-slider" min="20" max="80" value="36">
+
+            <label for="layout-slider">Layout (L/R):</label>
+            <input type="range" id="layout-slider" min="25" max="75" value="65">
+
+            <label for="toggle-instructions">Anweisungen ausblenden:</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-instructions">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- LÓGICA DE PANELES PRINCIPALES ---
+            const slidePane = document.getElementById('slide-pane');
+            const tpPane = document.getElementById('tp-pane');
+
+            // --- LÓGICA DE SLIDES (PANEL IZQUIERDO) ---
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const lightbox = slidePane.querySelector('#lightbox');
+            const lightboxImage = slidePane.querySelector('#lightbox-image');
+            const lightboxClose = slidePane.querySelector('.lightbox-close');
+            const slideImages = slidePane.querySelectorAll('.image-container img');
+
+            let currentSlide = 0;
+
+            // Funciones del Lightbox
+            function openLightbox(src) {
+                lightboxImage.src = src;
+                lightbox.style.display = 'flex';
+            }
+            function closeLightbox() {
+                lightbox.style.display = 'none';
+                lightboxImage.src = '';
+            }
+            slideImages.forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openLightbox(img.src);
+                });
+            });
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // Funciones de Slides
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                });
+
+                const slide = slides[index];
+                if (!slide) return;
+                
+                slide.classList.add('active');
+                currentSlide = index;
+                revealElements(slide);
+            }
+
+            function revealElements(slide) {
+                const items = slide.querySelectorAll('.reveal-item');
+                const delayStep = 250;
+                
+                items.forEach((item, index) => {
+                    item.classList.remove('revealed');
+                    item.style.transitionDelay = `${index * delayStep}ms`;
+                    setTimeout(() => {
+                        item.classList.add('revealed');
+                    }, 50);
+                });
+            }
+
+            function nextSlide() {
+                let next = currentSlide + 1;
+                if (next >= slides.length) {
+                    next = 0; 
+                }
+                showSlide(next);
+            }
+
+            function prevSlide() {
+                let prev = currentSlide - 1;
+                if (prev < 0) {
+                    prev = slides.length - 1; 
+                }
+                showSlide(prev);
+            }
+
+            // Event Listeners de Slides
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+
+            // Mostrar slide inicial
+            showSlide(0);
+
+            // --- LÓGICA DE TELEPROMPTER (PANEL DERECHO) ---
+            const tpControls = tpPane.querySelector('#controls');
+            const tpPlayPauseBtn = tpControls.querySelector('#play-pause-btn');
+            const tpResetBtn = tpControls.querySelector('#reset-btn');
+            const tpSpeedSlider = tpControls.querySelector('#speed-slider');
+            const tpFontsizeSlider = tpControls.querySelector('#fontsize-slider');
+            const tpToggleInstructionsBtn = tpControls.querySelector('#toggle-instructions');
+            const tpSpeakerTexts = tpPane.querySelectorAll('.speaker-text');
+
+            let isScrolling = false;
+            let scrollSpeed = parseFloat(tpSpeedSlider.value) / 40;
+            let animationFrameId = null;
+
+            // Funciones de Teleprompter
+            function tpScroll() {
+                if (!isScrolling) return;
+                tpPane.scrollBy(0, scrollSpeed); 
+                animationFrameId = requestAnimationFrame(tpScroll);
+            }
+
+            function tpTogglePlayPause() {
+                isScrolling = !isScrolling;
+                if (isScrolling) {
+                    tpPlayPauseBtn.textContent = 'Pause';
+                    tpScroll();
+                } else {
+                    tpPlayPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            }
+
+            // Event Listeners de Teleprompter
+            tpPlayPauseBtn.addEventListener('click', tpTogglePlayPause);
+
+            tpResetBtn.addEventListener('click', () => {
+                tpPane.scrollTo(0, 0); 
+                if (isScrolling) {
+                    isScrolling = false;
+                    tpPlayPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            });
+
+            tpSpeedSlider.addEventListener('input', (e) => {
+                scrollSpeed = parseFloat(e.target.value) / 40; 
+            });
+
+            tpFontsizeSlider.addEventListener('input', (e) => {
+                const newSize = e.target.value + 'px';
+                tpSpeakerTexts.forEach(textEl => {
+                    textEl.style.fontSize = newSize;
+                });
+            });
+
+            tpToggleInstructionsBtn.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.body.classList.add('hide-instructions');
+                } else {
+                    document.body.classList.remove('hide-instructions');
+                }
+            });
+
+            // Estado inicial del Teleprompter
+            const initialFontSize = tpFontsizeSlider.value + 'px';
+            tpSpeakerTexts.forEach(textEl => {
+                textEl.style.fontSize = initialFontSize;
+            });
+
+            // === LÓGICA DE LAYOUT (Panel Izquierdo/Derecho) ===
+            const layoutSlider = tpControls.querySelector('#layout-slider');
+
+            function applyLayout(leftValue) {
+                const leftPercent = leftValue;
+                const rightPercent = 100 - leftValue;
+                
+                slidePane.style.flex = `1 1 ${leftPercent}%`;
+                tpPane.style.flex = `1 1 ${rightPercent}%`;
+            }
+
+            // Aplicar el layout cuando se mueve el slider
+            layoutSlider.addEventListener('input', (e) => {
+                applyLayout(e.target.value);
+            });
+
+            // Aplicar el layout inicial al cargar la página
+            applyLayout(layoutSlider.value);
+
+
+            // --- CONTROLES DE TECLADO COMBINADOS ---
+            document.addEventListener('keydown', (e) => {
+                // Prioridad 1: Cerrar Lightbox
+                if (lightbox.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    }
+                    return; 
+                }
+
+                // Prioridad 2: Controles de Presentación
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === ' ') { 
+                    e.preventDefault(); 
+                    tpTogglePlayPause();
+                } 
+                else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const activeSlide = document.querySelector('.slide.active');
+                    if (activeSlide) {
+                        const image = activeSlide.querySelector('.image-container img');
+                        if (image) {
+                            openLightbox(image.src);
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>
