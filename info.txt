@@ -1,0 +1,33 @@
+Absolut. Hier ist ein sehr einfaches und klares Anleitungsdokument (auf Deutsch) für den Präsentator.
+Es konzentriert sich auf die sicherste und einfachste Methode für jemanden, der nicht technikaffin ist: die Zwei-Geräte-Methode.
+Anleitung für deine YouTube-Live Präsentation
+Hallo! Hier ist eine einfache Schritt-für-Schritt-Anleitung, wie du deine Präsentation hältst.
+Dein Ziel: Das Publikum sieht NUR deine Folien (Slides). Du siehst privat deinen Text (Teleprompter).
+Was du brauchst
+ * Computer 1 (Dein Haupt-Laptop): Für die Kamera und den YouTube-Stream.
+ * Gerät 2 (Dein Teleprompter): Ein iPad, Tablet oder zweiter Laptop.
+ * Die zwei Dateien:
+   * solo_slides.html (Für das Publikum)
+   * solo_teleprompter.html (Für dich)
+Schritt 1: Vorbereitung (Vor dem Live-Start)
+ * Auf Computer 1 (Haupt-Laptop):
+   * Öffne die Datei solo_slides.html in deinem Browser (z.B. Chrome oder Firefox).
+ * Auf Gerät 2 (Teleprompter):
+   * Öffne die Datei solo_teleprompter.html.
+   * Platziere dieses Gerät (z.B. dein iPad) direkt hinter oder unter die Kamera deines Haupt-Laptops. So sieht es aus, als ob du in die Kamera schaust, während du liest.
+Schritt 2: YouTube-Stream starten (Auf Computer 1)
+ * Gehe in dein YouTube-Live-Studio.
+ * Starte deinen Stream und deine Kamera.
+ * Klicke auf die Schaltfläche „Bildschirm teilen“ (oder "Präsentieren").
+ * SEHR WICHTIG: YouTube fragt dich, was du teilen möchtest. Wähle „Fenster“ (oder "Tab").
+   * Wähle NICHT „Gesamter Bildschirm“!
+ * Wähle aus der Liste das Browser-Fenster aus, in dem deine solo_slides.html geöffnet ist.
+Jetzt sieht dein Publikum nur dieses eine Fenster mit deinen Folien. Sie können deinen Teleprompter nicht sehen.
+Schritt 3: So steuerst du LIVE
+Du musst zwei Dinge getrennt steuern:
+A) Folien (für das Publikum) 🎬
+ * Um die Folie zu wechseln, drücke die Pfeil-Tasten auf deinem Computer 1 (Haupt-Laptop).
+   * → = Nächste Folie
+   * ← = Vorherige Folie
+B) Text (für dich privat) 📜
+ * Um deinen Text zu starten oder zu stoppen, drücke die Leertaste (Space) auf deinem Gerät 2 (Teleprompter).
