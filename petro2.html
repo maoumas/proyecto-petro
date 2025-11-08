@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presenter View: Petro-Clinton Skandal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+        /* --- Estructura de Pantalla Dividida --- */
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #111;
+            font-family: 'Inter', sans-serif;
+            color: #f0f0f0;
+        }
+
+        #slide-pane {
+            /* Valor inicial por defecto, JS lo controlará */
+            flex: 1 1 65%; 
+            height: 100vh;
+            position: relative;
+            background-color: #111827;
+        }
+
+        #tp-pane {
+            /* Valor inicial por defecto, JS lo controlará */
+            flex: 1 1 35%; 
+            height: 100vh;
+            position: relative;
+            overflow-y: scroll;
+            border-left: 2px solid #555;
+            background-color: #111;
+        }
+        
+        body.hide-instructions .instruction {
+            display: none;
+        }
+
+        /* --- ESTILOS DE SLIDES (Panel Izquierdo) --- */
+        #presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%; 
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 5% 8%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            visibility: hidden;
+        }
+        .slide.active { opacity: 1; transform: translateX(0); visibility: visible; }
+
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition-delay: 0s;
+        }
+        .reveal-item.revealed { opacity: 1; transform: translateY(0); }
+
+        .text-accent-red { color: #EF4444; }
+        .text-accent-blue { color: #3B82F6; }
+
+        #controls-wrapper {
+            position: absolute; 
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1F2937; 
+            z-index: 100;
+        }
+        
+        #slide-pane #controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #F9FAFB;
+            cursor: pointer;
+            padding: 8px 12px;
+            margin: 0 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .control-btn:hover { background-color: #374151; }
+        .control-btn svg { width: 24px; height: 24px; pointer-events: none; }
+
+        .image-container {
+            max-width: 450px;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 2px solid #374151;
+            cursor: zoom-in;
+        }
+
+        .slide-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .slide-layout { flex-direction: row; gap: 2rem; }
+            .slide-layout .content { flex-basis: 50%; text-align: left; }
+            .slide-layout .image-container { flex-basis: 50%; margin-top: 0; }
+            #slide-pane ul { padding-left: 1.5rem; }
+        }
+
+        .lightbox-overlay {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000; 
+            cursor: zoom-out;
+        }
+        #lightbox-image {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            border: 2px solid #F9FAFB;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #F9FAFB;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* --- ESTILOS DE TELEPROMPTER (Panel Derecho) --- */
+        
+        #tp-pane #controls {
+            position: sticky; 
+            bottom: 0; 
+            left: 0;
+            right: 0;
+            background-color: #222;
+            border-top: 2px solid #3B82F6;
+            padding: 0.75rem 1rem; /* Más pequeño */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem; /* Más pequeño */
+            z-index: 1000;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #tp-pane #controls button {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem; /* Más pequeño */
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #tp-pane #controls button:hover { background-color: #2563EB; }
+
+        #tp-pane #controls label {
+            font-weight: 600;
+            margin-left: 0.25rem; /* Más pequeño */
+            color: #ddd;
+            font-size: 0.875rem; /* Más pequeño (14px) */
+        }
+        #tp-pane #controls input[type="range"] { cursor: pointer; width: 120px; }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .3s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #3B82F6; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        #script-container {
+            padding: 1rem 2rem; 
+            padding-bottom: 100vh; 
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .speaker-text {
+            font-size: 2.25rem; 
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .instruction {
+            font-size: 1.125rem; 
+            color: #FFD700;
+            font-style: italic;
+            background-color: #2a2a2a;
+            border-left: 4px solid #FFD700;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            opacity: 0.9;
+        }
+
+        .timestamp {
+            font-size: 1.25rem; 
+            font-weight: 600;
+            color: #3B82F6;
+            border-top: 2px solid #444;
+            padding-top: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* --- Estilos para Móvil (Pantalla Pequeña) --- */
+        @media (max-width: 768px) {
+            /* Reduce el tamaño del panel de control en móviles */
+            #tp-pane #controls {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+
+            /* Oculta las etiquetas de texto en móviles (excepto el toggle) */
+            #tp-pane #controls > label:not(.toggle-switch) {
+                display: none;
+            }
+
+            /* Hace los sliders más pequeños en móviles */
+            #tp-pane #controls input[type="range"] {
+                width: 90px; /* Más corto que el original 120px */
+            }
+
+            /* Opcional: botones un poco más pequeños */
+            #tp-pane #controls button {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.875rem; /* 14px */
+            }
+        }
+
+    </style>
+</head>
+<body class="">
+
+    <div id="slide-pane">
+        
+        <div id="presentation-container">
+            
+            <div class="slide active" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h1 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">LIVE: Clinton-Liste gegen Petro – Skandal in Bogotá!</h1>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">Gustavo Petro sanktioniert: Warum?</li>
+                            <li class="reveal-item text-accent-blue">Live-Übersetzungen & Analyse</li>
+                            <li class="reveal-item">Umfrage: “Gerecht oder Rache?”</li>
+                            <li class="reveal-item">Chat: Teilt eure Meinungen!</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-1.jpg" alt="Gustavo Petro bei einer Kundgebung in Kolumbien">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Wer ist Gustavo Petro?</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">Geboren 1960, Ex-Guerrillero (M-19)</li>
+                            <li class="reveal-item">Erster linker Präsident seit 2022</li>
+                            <li class="reveal-item text-accent-blue">“Totaler Frieden”: Verhandlungen statt Krieg</li>
+                            <li class="reveal-item">US-Beziehungen: Plan Colombia – Milliarden-Hilfe</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-2.jpg" alt="Donald Trump droht mit Sanktionen">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Die Eskalation: September bis Oktober 2025</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">Sept: Visum-Verlust nach UN-Rede</li>
+                            <li class="reveal-item">Okt: US-Schiffe versenken Boote (37 Tote)</li>
+                            <li class="reveal-item">Okt: Hilfen gestoppt, 50% Zölle</li>
+                            <li class="reveal-item">Okt: Clinton-Liste</li>
+                            <li class="reveal-item text-accent-blue">Statistik: Kokain-Produktion: 2.664 Tonnen (UNODC 2024)</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-3.png" alt="Karte Kolumbiens mit Kokaanbaugebieten">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="600"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">US-Treasury: Die Anklage gegen Petro</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">“Nichts gegen Drogen getan” – Rekord-Produktion</li>
+                            <li class="reveal-item">Familie: Frau, Sohn (Geldwäsche), Benedetti</li>
+                            <li class="reveal-item">Kein direkter Beweis, nur Untätigkeit</li>
+                            <li class="reveal-item">Vergleich: Duque-Zeit +43% Steigerung</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-4.png" alt="US Treasury SDN-Liste Dokument">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="300"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Kokain-Boom: Fakten & Zahlen</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">2023: 253.000 Hektar Koka (+10%)</li>
+                            <li class="reveal-item">2024: 626 Tonnen beschlagnahmt (Rekord)</li>
+                            <li class="reveal-item">US-Konsum: 40% weltweit</li>
+                            <li class="reveal-item text-accent-red">“War on Drugs”-Versagen seit 1971</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-5.png" alt="Graph der Kokain-Produktion in Kolumbien">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="600"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Petro schlägt zurück: Bolívar-Platz-Rede</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">“Erpressung durch die Mafia!”</li>
+                            <li class="reveal-item">“USA: Stoppt Konsum, nicht nur Produktion”</li>
+                            <li class="reveal-item">Anwalt engagiert: Dan Kovalik</li>
+                            <li class="reveal-item">Wirtschaft: Peso fällt, Investoren fliehen</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-6.jpg" alt="Illustration von Medien-Zensur">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="900"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Die Clinton-Liste: Geschichte & Effekte</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">1995: Kingpin Act unter Clinton</li>
+                            <li class="reveal-item">Über 10.000 Namen (z. B. El Chapo 2001, Maduro 2019)</li>
+                            <li class="reveal-item">Effekte: Vermögen einfrieren, Reiseverbot</li>
+                            <li class="reveal-item">Kolumbien: Tausende Einträge seit 90er</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-7.jpg" alt="Mugshot von El Chapo als Clinton-List-Beispiel">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="900"> <div class="slide-layout">
+                    <div class="content">
+                        <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Medien-Schweigen: Zensur oder Überflutung?</h2>
+                        <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc">
+                            <li class="reveal-item">NYT: Nur Seite A10</li>
+                            <li class="reveal-item">Economist/BBC: Kaum Berichte</li>
+                            <li class="reveal-item text-accent-red">Spanische Medien: Explosion!</li>
+                            <li class="reveal-item">Gründe: News-Überflutung, Angst vor Trump</li>
+                        </ul>
+                    </div>
+                    <div class="reveal-item image-container">
+                        <img src="images/slide-8.png" alt="Kokain-Schmuggelrouten von Kolumbien nach Europa">
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-duration="900"> <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Was bedeutet das für uns in Europa?</h2>
+                <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto">
+                    <li class="reveal-item">80% EU-Kokain aus Kolumbien</li>
+                    <li class="reveal-item">Preis: 60€/Gramm in Berlin</li>
+                    <li class="reveal-item">Flüchtlinge, Zölle: Deutsche Firmen betroffen</li>
+                    <li class="reveal-item text-accent-blue">Global: Machtpolitik USA</li>
+                </ul>
+            </div>
+
+            <div class="slide" data-duration="1800"> <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6">Eure Fragen & Fazit</h2>
+                <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto">
+                    <li class="reveal-item">Chat-Fragen live beantworten</li>
+                    <li class="reveal-item text-accent-red">Abonniert für mehr!</li>
+                    <li class="reveal-item">Nächstes Live: Trump-Zölle?</li>
+                    <li class="reveal-item">Danke & Quellen</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div id="controls-wrapper">
+            <div id="controls">
+                <button id="prev-btn" class="control-btn" aria-label="Vorherige Folie">
+                    <svg fill="currentColor" viewBox="0 0 20 20"><path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"></path></svg>
+                </button>
+                <button id="next-btn" class="control-btn" aria-label="Nächste Folie">
+                    <svg fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="lightbox" class="lightbox-overlay">
+            <span class="lightbox-close">&times;</span>
+            <img id="lightbox-image" src="" alt="Vergrößerte Ansicht">
+        </div>
+
+    </div>
+
+    <div id="tp-pane">
+        
+        <div id="script-container">
+
+            <h2 class="timestamp">0:00 – 0:05 | START – MIT VOLLEM TEMPO UND EINLEITUNG</h2>
+            <p class="instruction">(Kamera an, kurzer Beat, Logo poppt rein. Grafik: US-Flagge vs. Kolumbien-Flagge, mit “Sanktionen-Alarm!”-Text)</p>
+            <p class="speaker-text">
+                „Hallo zusammen, willkommen bei TranslatedPress DE LIVE! Ich bin [Dein Name], und heute haben wir ein echtes Erdbeben in der Weltpolitik: Kolumbiens Präsident Gustavo Petro ist auf der CLINTON-LISTE! Ja, ihr hört richtig – der erste linke Präsident Kolumbiens wird vom US-Finanzministerium wie ein Drogenbaron behandelt. Und nicht nur er: Seine Frau, sein Sohn und sein Innenminister sind auch dran.
+                <br><br>
+                Das ist kein Witz, Leute. Wir reden von Sanktionen gegen einen demokratisch gewählten Präsidenten eines Landes, das seit Jahrzehnten US-Verbündeter ist. Warum? Weil die USA sagen: Petro lässt die Drogenkartelle wachsen. Aber ist das die Wahrheit, oder ist das politische Rache von Trump?
+                <br><br>
+                Heute machen wir das volle Programm:
+                <br>
+                Live-Übersetzungen der offiziellen US-Dokumente und Petros Reden.
+                <br>
+                Tiefe Analysen zur Geschichte der Clinton-Liste, Petros Biografie und den US-Kolumbien-Beziehungen.
+                <br>
+                Statistiken zu Kokain-Produktion – frisch aus UN-Berichten.
+                <br>
+                Diskussion über Medien-Schweigen – warum hört man nichts in den großen Zeitungen?
+                <br>
+                Auswirkungen auf uns in Europa – Drogen, Wirtschaft, Flüchtlinge.
+                <br>
+                Und viel Chat-Interaktion: Umfragen, Fragen, eure Meinungen!
+                <br><br>
+                Erste Umfrage läuft schon: „Sind die Sanktionen gerecht oder nur Rache?“ Schaut in den Chat – haut eure Gedanken rein! Wir haben heute extra Zeit, weil das Thema so riesig ist. Lasst uns starten – Bildschirm an!“
+            </p>
+            <p class="instruction">(Paus: 10 Sekunden für Chat-Kommentare. Wortanzahl hier: ca. 250)</p>
+
+            <h2 class="timestamp">0:05 – 0:15 | DIE STORY IN DETAIL: CHRONOLOGIE UND HINTERGRUND</h2>
+            <p class="instruction">(Grafik: Erweiterter Zeitstrahl – mit Fotos von Petro, Trump, Karten von Kolumbien. Füge Statistiken ein)</p>
+            <p class="speaker-text">
+                „Bevor wir in die Übersetzungen springen, lasst uns die Story von Anfang an aufrollen. Das ist wichtig, weil das nicht aus dem Nichts kommt – das ist der Höhepunkt einer langen Fehde.
+                <br><br>
+                Zuerst mal: Wer ist Gustavo Petro eigentlich? Geboren 1960 in einer kleinen Stadt in Kolumbien, kommt er aus einfachen Verhältnissen. Als Teenager schließt er sich der M-19-Guerrilla an – das war eine linke Rebellengruppe in den 70er und 80er Jahren, die gegen die korrupte Regierung kämpfte. Petro wurde gefoltert, saß im Gefängnis, aber nach der Amnestie 1990 wird er Politiker. Er war Abgeordneter, Senator, Bürgermeister von Bogotá und jetzt seit 2022 erster linker Präsident Kolumbiens. Sein Motto: ‘Totaler Frieden’ – Verhandlungen mit Rebellen statt Krieg, und weg vom alten ‘War on Drugs’-Modell.
+                <br><br>
+                Aber das passt den USA nicht. Schaut her: Die US-Kolumbien-Beziehungen gehen zurück bis in die 80er. Damals startet Präsident Reagan den ‘War on Drugs’, und Kolumbien wird zum Schlachtfeld. 1999 kommt Plan Colombia – Milliarden US-Dollar für Militärhilfe, um Kokaplanten zu zerstören. Bis heute hat die USA über 10 Milliarden investiert, aber was ist das Ergebnis? Kokain-Produktion boomt! Laut UNODC-Bericht von 2024: In Kolumbien wuchsen 2023 253.000 Hektar Koka – 10% mehr als 2022. Potenzielle Kokain-Produktion: 2.664 Tonnen, ein Plus von 53%! Und 2024? Die Regierung hat schon 604 Tonnen Kokain beschlagnahmt – Rekord!
+                <br><br>
+                Jetzt die Eskalation: September 2025 – Petro verliert sein US-Visum nach einer UN-Rede, wo er Trump ‘Genozid in Gaza’ vorwirft und US-Soldaten aufruft, Befehle zu verweigern. Dann Oktober: US-Schiffe versenken Boote vor Kolumbiens Küste – offiziell gegen Drogen, aber Kolumbien sagt: ‘Das sind Fischer, das ist Mord!’ Mindestens 37 Tote. Petro protestiert laut. Am 19. Oktober stoppt Trump alle Hilfen – 377 Millionen Dollar pro Jahr! Und droht mit 50% Zöllen auf kolumbianische Waren.
+                <br><br>
+                Unser Video vom 20. Oktober hat das schon übersetzt: Trump nennt Petro einen ‘illegalen Drogenführer’. Und dann der Hammer: 24. Oktober 2025 – das US-Finanzministerium setzt Petro, seine Frau Verónica Alcocer, Sohn Nicolás und Innenminister Armando Benedetti auf die Clinton-Liste. Das ist historisch – vergleichbar mit Sanktionen gegen Maduro in Venezuela 2019, aber Maduro ist kein US-Verbündeter.
+                <br><br>
+                Karte einblenden: Seht die roten Zonen – das sind die Kokaregionen in Kolumbien. Petro will da mit Sozialprogrammen helfen, nicht mit Gift sprühen. Aber die USA sagen: ‘Du lässt Kartelle wachsen!’ Ist das fair? Lasst es uns im Chat diskutieren.“
+            </p>
+            <p class="instruction">(Pause: 20 Sekunden für Chat. Umfrage-Update: ‘Bisher 60% sagen Rache!’ Wortanzahl hier: ca. 550, gesamt 800)</p>
+
+            
+            <h2 class="timestamp">0:15 – 0:30 | LIVE-ÜBERSETZUNG: US-FINANZMINISTERIUM – MIT TIEFER ANALYSE</h2>
+            <p class="instruction">(Originaldokument auf Bildschirm + deutsche Untertitel live einblenden. Füge Zitate und Erklärungen ein)</p>
+            <p class="speaker-text">
+                „Okay, jetzt zum Kern: Die offizielle US-Pressemitteilung vom 24. Oktober 2025. Ich übersetze live, Schritt für Schritt, und erkläre, was das bedeutet. Das Dokument kommt vom Office of Foreign Assets Control (OFAC) – das ist die US-Behörde für Sanktionen.
+                <br><br>
+                „Heute hat das US-Finanzministerium Präsident Gustavo Petro… auf die SDN-Liste gesetzt…“
+                <br>
+                Übersetzung: „Heute hat das US-Finanzministerium Präsident Petro auf die Schwarze Liste gesetzt…“
+                <br><br>
+                „…weil er nichts unternommen hat, um den Drogenhandel zu stoppen. Seit Petro Präsident ist, explodiert die Kokain-Produktion auf Rekordniveau.“
+                <br>
+                Übersetzung: „…weil er nichts getan hat, um den Drogenhandel zu stoppen. Seit Petro Präsident ist, explodiert die Kokain-Produktion auf Rekordniveau.“
+                <br><br>
+                Lasst uns das aufbrechen: Die USA zitieren UN-Zahlen – ja, 2.664 Tonnen potenziell 2023. Aber wisst ihr, dass unter dem rechten Vorgänger Duque die Produktion auch stieg? Von 2018 bis 2022: Plus 43%! Also, ist das wirklich Petros Schuld? Oder liegt’s am ‘War on Drugs’-Versagen? Seit Nixon 1971 hat die USA Milliarden ausgegeben – und Kokain ist billiger als je.
+                <br><br>
+                Weiter:
+                <br>
+                „Kokain flutet die USA und vergiftet Amerikaner. Petro weigert sich, mit uns zusammenzuarbeiten.“
+                <br>
+                Übersetzung: „Kokain flutet die USA und vergiftet Amerikaner. Petro weigert sich, mit uns zusammenzuarbeiten.“
+                <br><br>
+                Sekretär Scott Bessent sagt: ‘Petro lässt Kartelle blühen.’ Aber Petro hat 2024 mehr Kokain beschlagnahmt als je – 626 Tonnen! Und seine ‘Total Peace’-Politik: Verhandlungen mit ELN und Clan del Golfo, um den Krieg zu beenden. Kritiker sagen: ‘Das ist Appeasement.’ Aber historisch: Plan Colombia hat 2 Millionen Menschen vertrieben, ohne Drogen zu stoppen.
+                <br><br>
+                Nun zur Familie:
+                <br>
+                „Auch First Lady Verónica Alcocer, Sohn Nicolás Petro Burgos und Armando Benedetti – wegen Unterstützung des Versagens.“
+                <br>
+                Übersetzung: „Auch die First Lady, der Sohn und der Innenminister – weil sie das mitgemacht haben.“
+                <br><br>
+                Hintergrund: Nicolás Petro wurde 2023 verhaftet – Geldwäsche aus Kampagnengeldern, angeblich von Drogenhändlern. Er sitzt unter Hausarrest, und der Prozess läuft. Seine Ex-Frau Daysuris Vásquez hat ihn angeklagt, dass er 200 Millionen Pesos (ca. 50.000 Euro) von dubiosen Quellen nahm. Petro Senior sagt: ‘Ich wusste nichts davon.’ Aber die USA nutzen das jetzt. Verónica Alcocer? Sie wird beschuldigt, Einfluss zu nehmen, aber keine direkten Drogen-Links. Benedetti: Skandal-umwittert, ehemaliger Botschafter.
+                <br><br>
+                Kommentar: Kein direkter Beweis gegen Petro selbst – nur ‘Untätigkeit’. Das ist neu für einen Verbündeten. Vergleich: 2019 Maduro sanktioniert – aber Venezuela ist Feind. Hier? Politisch motiviert?“
+            </p>
+            <p class="instruction">(Pause: 30 Sekunden. Chat-Frage: ‘Wer kennt mehr zu Nicolás?’ Wortanzahl hier: ca. 650, gesamt 1450)</p>
+
+            
+            <h2 class="timestamp">0:30 – 0:45 | PETRO SCHLÄGT ZURÜCK – LIVE-ÜBERSETZUNG UND BIO-VERGLEICH</h2>
+            <p class="instruction">(Clip: Petro vor Menge – Untertitel live. Füge Biografie-Details ein)</p>
+            <p class="speaker-text">
+                „Jetzt hört Petro selbst – seine Rede vom 26. Oktober auf dem Bolívar-Platz, vor 50.000 Leuten. Ich übersetze und analysiere.
+                <br><br>
+                „Das ist politische Erpressung durch die Mafia! Wir haben Jahrzehnte gekämpft – und jetzt bestraft man uns, weil wir Frieden wollen?“
+                <br>
+                Übersetzung: „Das ist politische Erpressung durch die Mafia! Wir haben Jahrzehnte gekämpft – und jetzt Strafe, weil wir Frieden wollen?“
+                <br><br>
+                Petro meint die US-‘Mafia’ – Trump und Co. Erinnert euch: Als Guerrillero kämpfte er gegen Drogen-Paramilitärs. Als Senator enthüllte er Korruption. Jetzt als Präsident: Er will Koka-Bauern helfen, statt sie zu bombardieren.
+                <br><br>
+                Weiter:
+                <br>
+                „Die USA fordern: Stoppt die Produktion – aber sie stoppen nicht den Konsum! Wir haben Milliarden bekommen, und nichts hat sich geändert.“
+                <br>
+                Übersetzung: „USA fordern: Stoppt die Produktion – aber sie stoppen nicht den Konsum! Wir haben Milliarden bekommen, und nichts hat sich geändert.“
+                <br><br>
+                Richtig: USA konsumieren 40% des Welt-Kokains. Und Plan Colombia? Hat Kolumbien in einen Bürgerkrieg gestürzt – 9 Millionen Opfer seit 1960. Petro will umdenken: Legalisiere Koka-Blatt (wie in Bolivien), investiere in Bildung. Aber Trump will ‘hart durchgreifen’.
+                <br><br>
+                Mehr aus der Rede: Petro hat Anwalt Dan Kovalik engagiert – der kämpft gegen die Sanktionen. Er sagt: ‘Das ist Angriff auf die Souveritänität.’ Und Kolumbien? Die Wirtschaft leidet: Peso fällt, Investoren fliehen. Bis 2026 (Ende seiner Amtszeit) könnte das Chaos verursachen.“
+            </p>
+            <p class="instruction">(Pause: 20 Sekunden. Umfrage: ‘Unterstützt ihr Petros Friedenspolitik?’ Wortanzahl hier: ca. 400, gesamt 1850)</p>
+
+            
+            <h2 class="timestamp">0:45 – 1:00 | WAS IST DIE CLINTON-LISTE? GESCHICHTE UND BEISPIELE</h2>
+            <p class="instruction">(Grafik: Timeline Clinton-Liste, Beispiele wie El Chapo, Maduro. Erweitere mit Geschichte)</p>
+            <p class="speaker-text">
+                „Viele fragen im Chat: Was ist diese Clinton-Liste genau? Lasst uns das aufklären – mit Geschichte.
+                <br><br>
+                Die Liste heißt offiziell Specially Designated Nationals (SDN) List vom OFAC. Begonnen 1995 unter Bill Clinton mit dem ‘Kingpin Act’ gegen Drogenkartelle. Ziel: Vermögen einfrieren, Geschäfte verbieten. Heute: Über 10.000 Namen – von Terroristen bis Firmen. In Kolumbien: Seit 1990er Tausende, z.B. Pablo Escobar-Nachfolger, korrupte Politiker. 2014: 904 Seiten nur Kolumbianer!
+                <br><br>
+                Beispiele: El Chapo Guzmán 2001 drauf – mexikanischer Boss. Maduro 2019 – wegen Drogen und Korruption. Effekt: Kein US-Business, Reisen verboten. Aber rauskommen? Möglich, mit Beweisen – wie einige Kolumbianer nach Verhandlungen.
+                <br><br>
+                Für Petro: Er sagt ‘Kein US-Vermögen’, aber Familie? Sohn Nicolás hatte Skandale – 2023 Verhaftung, Geld von Drogenhändlern. Das nutzen die USA. Ist das fair? Oder nur, weil Petro Trump kritisiert?“
+            </p>
+            <p class="instruction">(Pause: 15 Sekunden. Wortanzahl hier: ca. 300, gesamt 2150)</p>
+
+            
+            <h2 class="timestamp">1:00 – 1:15 | DAS MEDIEN-SCHWEIGEN – COVER-UP ODER NORMAL?</h2>
+            <p class="instruction">(Grafik: Medien-Logos mit ‘0 Artikel’. Erweitere mit Beispielen aus Suche)</p>
+            <p class="speaker-text">
+                „Jetzt der Skandal: Warum schweigen die großen Medien? NYT: Nur ein kleiner Artikel. Economist: Nichts Neues. BBC, CNN: Kurze Meldungen.
+                <br><br>
+                Beispiele aus Geschichte: Bei Sanktionen gegen Maduro 2019 – Titelseiten überall. Bei Iran 2025 – große Berichte. Aber hier? Vielleicht weil’s Trump ist – Medien wollen neutral bleiben. Oder News-Überflutung: Gaza, Ukraine. Spanische Medien: Explodieren! El Tiempo: ‘Imperialismus!’
+                <br><br>
+                Ist das Zensur? Oder Prioritäten? Im Chat: Viele sagen ‘Ja!’“
+            </p>
+            <p class="instruction">(Pause: 20 Sekunden. Umfrage: ‘Zensur?’ Wortanzahl hier: ca. 200, gesamt 2350)</p>
+
+            
+            <h2 class="timestamp">1:15 – 1:30 | WAS BEDEUTET DAS FÜR EUROPA UND DEUTSCHLAND?</h2>
+            <p class="instruction">(Karte: Drogen-Routen, Statistiken)</p>
+            <p class="speaker-text">
+                „Warum uns? 80% EU-Kokain aus Kolumbien – Preise fallen. Wenn Kolumbien kippt: Mehr Flüchtlinge, höhere Preise für Kaffee. Trump-Zölle: Trifft deutsche Firmen. Das ist global!“
+            </p>
+            <p class="instruction">(Pause: 15 Sekunden. Wortanzahl hier: ca. 150, gesamt 2500)</p>
+
+            
+            <h2 class="timestamp">1:30 – ENDE | FRAGEN AUS DEM CHAT + ABSCHLUSS</h2>
+            <p class="speaker-text">
+                „Jetzt eure Fragen! [Beantworte 5–10 live]. Danke! Abonniert, Telegram joinen. Bis nächstes Mal!“
+            </p>
+            <p class="instruction">(Outro: Musik, Quellen. Gesamtwortanzahl: ca. 2500)</p>
+
+        </div>
+
+        <div id="controls">
+            <button id="play-pause-btn">Play</button>
+            <button id="reset-btn">Reset</button>
+
+            <label for="speed-slider">Tempo:</label>
+            <input type="range" id="speed-slider" min="1" max="100" value="20">
+            
+            <label for="fontsize-slider">Schriftgröße:</label>
+            <input type="range" id="fontsize-slider" min="20" max="80" value="36">
+
+            <label for="layout-slider">Layout (L/R):</label>
+            <input type="range" id="layout-slider" min="0" max="100" value="65">
+
+            <label for="toggle-instructions">Anweisungen ausblenden:</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-instructions">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- LÓGICA DE PANELES PRINCIPALES ---
+            const slidePane = document.getElementById('slide-pane');
+            const tpPane = document.getElementById('tp-pane');
+
+            // --- LÓGICA DE SLIDES (PANEL IZQUIERDO) ---
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const lightbox = slidePane.querySelector('#lightbox');
+            const lightboxImage = slidePane.querySelector('#lightbox-image');
+            const lightboxClose = slidePane.querySelector('.lightbox-close');
+            const slideImages = slidePane.querySelectorAll('.image-container img');
+
+            let currentSlide = 0;
+
+            // Funciones del Lightbox
+            function openLightbox(src) {
+                lightboxImage.src = src;
+                lightbox.style.display = 'flex';
+            }
+            function closeLightbox() {
+                lightbox.style.display = 'none';
+                lightboxImage.src = '';
+            }
+            slideImages.forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openLightbox(img.src);
+                });
+            });
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // Funciones de Slides
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                });
+
+                const slide = slides[index];
+                if (!slide) return;
+                
+                slide.classList.add('active');
+                currentSlide = index;
+                revealElements(slide);
+            }
+
+            function revealElements(slide) {
+                const items = slide.querySelectorAll('.reveal-item');
+                const delayStep = 250;
+                
+                items.forEach((item, index) => {
+                    item.classList.remove('revealed');
+                    item.style.transitionDelay = `${index * delayStep}ms`;
+                    setTimeout(() => {
+                        item.classList.add('revealed');
+                    }, 50);
+                });
+            }
+
+            function nextSlide() {
+                let next = currentSlide + 1;
+                if (next >= slides.length) {
+                    next = 0; 
+                }
+                showSlide(next);
+            }
+
+            function prevSlide() {
+                let prev = currentSlide - 1;
+                if (prev < 0) {
+                    prev = slides.length - 1; 
+                }
+                showSlide(prev);
+            }
+
+            // Event Listeners de Slides
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+
+            // Mostrar slide inicial
+            showSlide(0);
+
+            // --- LÓGICA DE TELEPROMPTER (PANEL DERECHO) ---
+            const tpControls = tpPane.querySelector('#controls');
+            const tpPlayPauseBtn = tpControls.querySelector('#play-pause-btn');
+            const tpResetBtn = tpControls.querySelector('#reset-btn');
+            const tpSpeedSlider = tpControls.querySelector('#speed-slider');
+            const tpFontsizeSlider = tpControls.querySelector('#fontsize-slider');
+            const tpToggleInstructionsBtn = tpControls.querySelector('#toggle-instructions');
+            const tpSpeakerTexts = tpPane.querySelectorAll('.speaker-text');
+
+            let isScrolling = false;
+            let scrollSpeed = parseFloat(tpSpeedSlider.value) / 40;
+            let animationFrameId = null;
+
+            // Funciones de Teleprompter
+            function tpScroll() {
+                if (!isScrolling) return;
+                tpPane.scrollBy(0, scrollSpeed); 
+                animationFrameId = requestAnimationFrame(tpScroll);
+            }
+
+            function tpTogglePlayPause() {
+                isScrolling = !isScrolling;
+                if (isScrolling) {
+                    tpPlayPauseBtn.textContent = 'Pause';
+                    tpScroll();
+                } else {
+                    tpPlayPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            }
+
+            // Event Listeners de Teleprompter
+            tpPlayPauseBtn.addEventListener('click', tpTogglePlayPause);
+
+            tpResetBtn.addEventListener('click', () => {
+                tpPane.scrollTo(0, 0); 
+                if (isScrolling) {
+                    isScrolling = false;
+                    tpPlayPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            });
+
+            tpSpeedSlider.addEventListener('input', (e) => {
+                scrollSpeed = parseFloat(e.target.value) / 40; 
+            });
+
+            tpFontsizeSlider.addEventListener('input', (e) => {
+                const newSize = e.target.value + 'px';
+                tpSpeakerTexts.forEach(textEl => {
+                    textEl.style.fontSize = newSize;
+                });
+            });
+
+            tpToggleInstructionsBtn.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.body.classList.add('hide-instructions');
+                } else {
+                    document.body.classList.remove('hide-instructions');
+                }
+            });
+
+            // Estado inicial del Teleprompter
+            const initialFontSize = tpFontsizeSlider.value + 'px';
+            tpSpeakerTexts.forEach(textEl => {
+                textEl.style.fontSize = initialFontSize;
+            });
+
+            // === LÓGICA DE LAYOUT (Panel Izquierdo/Derecho) ===
+            const layoutSlider = tpControls.querySelector('#layout-slider');
+
+            function applyLayout(leftValue) {
+                const leftPercent = leftValue;
+                const rightPercent = 100 - leftValue;
+                
+                slidePane.style.flex = `1 1 ${leftPercent}%`;
+                tpPane.style.flex = `1 1 ${rightPercent}%`;
+            }
+
+D
+            // Aplicar el layout cuando se mueve el slider
+            layoutSlider.addEventListener('input', (e) => {
+                applyLayout(e.target.value);
+            });
+
+            // Aplicar el layout inicial al cargar la página
+            applyLayout(layoutSlider.value);
+            // === FIN DE LÓGICA ===
+
+
+            // --- CONTROLES DE TECLADO COMBINADOS ---
+            document.addEventListener('keydown', (e) => {
+                // Prioridad 1: Cerrar Lightbox
+                if (lightbox.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    }
+                    return; 
+                }
+
+                // Prioridad 2: Controles de Presentación
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === ' ') { 
+                    e.preventDefault(); 
+                    tpTogglePlayPause();
+                } 
+                else if (e.key === 'Enter') {
+                    e.preventDefault(); 
+                    const activeSlide = document.querySelector('.slide.active');
+                    if (activeSlide) {
+                        const image = activeSlide.querySelector('.image-container img');
+                        if (image) {
+                            openLightbox(image.src);
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>
