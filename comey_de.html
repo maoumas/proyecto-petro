@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleprompter: Comey - Gerechtigkeit oder Rache</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        
+        body {
+            background-color: #111;
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth; /* Wichtig für den Reset-Button */
+        }
+
+        /* Steuerleiste */
+        #controls {
+            position: sticky; /* Hält die Leiste am unteren Rand */
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #222;
+            border-top: 2px solid #3B82F6; /* Blauer Akzent */
+            padding: 0.75rem 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #controls button {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #controls button:hover {
+            background-color: #2563EB;
+        }
+
+        #controls label {
+            font-weight: 600;
+            margin-left: 0.25rem;
+            color: #ddd;
+            font-size: 0.875rem; /* 14px */
+        }
+
+        #controls input[type="range"] {
+            cursor: pointer;
+            width: 120px;
+        }
+
+        /* Schalter für Anweisungen */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .3s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3B82F6;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Skript-Container */
+        #script-container {
+            padding: 1rem 2rem;
+            padding-bottom: 100vh; /* Sorgt dafür, dass man bis zum Ende scrollen kann */
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Sprecher-Text */
+        .speaker-text {
+            font-size: 2.25rem; /* 36px - wird durch JS gesteuert */
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+        
+        /* Fettgedruckter Text innerhalb des Sprechertextes */
+        .speaker-text strong {
+             color: #FBBF24; /* Gelber Akzent für Hervorhebung */
+        }
+
+        /* Regieanweisungen (falls vorhanden) */
+        .instruction {
+            font-size: 1.125rem; /* 18px */
+            color: #FFD700; /* Gold/Gelb */
+            font-style: italic;
+            background-color: #2a2a2a;
+            border-left: 4px solid #FFD700;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            opacity: 0.9;
+        }
+
+        /* Zeitstempel / Folienüberschriften */
+        .timestamp {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            color: #3B82F6; /* Blau */
+            border-top: 2px solid #444;
+            padding-top: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Zustand, wenn Anweisungen ausgeblendet sind */
+        body.hide-instructions .instruction {
+            display: none;
+        }
+
+        /* Stile für Mobilgeräte */
+        @media (max-width: 768px) {
+            #controls {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            #controls > label:not(.toggle-switch) {
+                display: none;
+            }
+            #controls input[type="range"] {
+                width: 90px;
+            }
+            #controls button {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.875rem; /* 14px */
+            }
+            .speaker-text {
+                font-size: 1.75rem; /* Kleiner auf Mobilgeräten */
+            }
+            #script-container {
+                padding: 1rem 1rem; /* Weniger horizontaler Rand */
+            }
+        }
+    </style>
+</head>
+<body class="">
+
+    <!-- TELEPROMPTER SKRIPT-INHALT (BASIEREND AUF DEM DOKUMENT) -->
+    <div id="script-container">
+
+        <h2 class="timestamp">AKT I: Der Kontext (0:00 – 0:30) | Einführung (0:00 – 0:05)</h2>
+        <p class="speaker-text">
+            Guten Abend, und herzlich willkommen zu unserem Spezialprogramm. Heute beschäftigen wir uns mit einer zentralen Frage der amerikanischen Politik, einer Frage, die auf den Grundsatz abzielt: Erleben wir hier einen Akt der <strong>Gerechtigkeit oder Rache</strong>? Die Rede ist vom Fall gegen James Comey, den ehemaligen Direktor des FBI.
+            <br><br>
+            James Comey, im Jahr 2017 von Präsident Donald Trump entlassen, wurde nun offiziell von einer Grand Jury in zwei Anklagepunkten angeklagt: einer wegen <strong>Falschaussage</strong> und der andere wegen <strong>Behinderung eines Kongressverfahrens</strong>. Diese Anklage ist nicht überraschend, da Präsident Trump seinen Wunsch geäußert hatte, Comey, den er als einen seiner Hauptgegner ansah, strafrechtlich verfolgen zu sehen.
+        </p>
+
+        <h2 class="timestamp">Comey und die 'Instrumentalisierung' (0:05 – 0:15)</h2>
+        <p class="speaker-text">
+            Um diesen Fall zu verstehen, müssen wir uns den Kontext ansehen. Comey war FBI-Direktor, als Trumps Wahlkampf 2016 wegen möglicher Verbindungen zu Russland untersucht wurde. Aus der Sicht von Präsident Trump und seinen Verbündeten haben Comey und andere hochrangige Beamte die Bundesregierung gegen den Präsidenten <strong>"instrumentalisiert"</strong> (weaponized).
+            <br><br>
+            Laut dem Kongressabgeordneten Brandon Gill müssen Comey und John Brennan (ehemaliger CIA-Direktor) Rechenschaft ablegen, weil sie wiederholt über die Vorgänge unter den Obama- und Biden-Administrationen gelogen haben sollen. Die Erzählung ist klar: <strong>Das amerikanische Volk fordert, dass diejenigen auf den höchsten Regierungsebenen, die vor dem Kongress lügen, angeklagt werden</strong>.
+            <br><br>
+            Dieser Prozess stellt für viele Konservative die notwendige <strong>Rechenschaftspflicht</strong> für jene dar, die "die Bundesregierung gegen ihre politischen Feinde instrumentalisiert haben".
+        </p>
+
+        <h2 class="timestamp">Die Comey-Trump-Geschichte (0:15 – 0:30)</h2>
+        <p class="speaker-text">
+            Die Geschichte zwischen Comey und Trump ist lang und angespannt. Comey weigerte sich, Trump die von ihm geforderte "Loyalität" öffentlich zu zeigen, wie aus Comeys eigenen Memos hervorgeht. Zu Beginn seiner zweiten Amtszeit hatte Präsident Trump eine lange Liste von Zielen, denen er Vergeltung wünschte für die Ermittlungen und Anklagen, denen er selbst ausgesetzt war. <strong>James Comey stand ganz oben auf dieser Liste</strong>.
+            <br><br>
+            Nach der Anklage veröffentlichte Comey ein Video, in dem er einen trotzigen Ton anschlug: "Meine Familie und ich wissen seit Jahren, dass es seinen Preis hat, sich Donald Trump entgegenzustellen, aber wir könnten uns kein anderes Leben vorstellen. <strong>Wir werden nicht auf unseren Knien leben, und Sie sollten es auch nicht</strong>".
+            <br><br>
+            Comey äußerte auch sein Vertrauen in das föderale Justizsystem und erklärte seine Unschuld: <strong>"Ich bin unschuldig. Also lasst uns einen Prozess führen und den Glauben bewahren"</strong>.
+            <br><br>
+            Senator Ted Cruz beschrieb diese Erklärung jedoch als eine "politische Rede", der jeglicher Verweis auf das Gesetz oder die Fakten fehle. Comey wurde nicht wegen seiner Parteilichkeit angeklagt, sondern wegen der mutmaßlichen <strong>Lüge unter Eid vor dem Kongress</strong>.
+        </p>
+
+        <h2 class="timestamp">AKT II: Die Anklage (0:30 – 1:00) | Der Kern der Lüge (0:30 – 0:40)</h2>
+        <p class="speaker-text">
+            Was ist das angebliche Verbrechen? Die Anklage konzentriert sich auf Comeys Aussage vor dem Kongress zur Autorisierung von Informationslecks an die Presse.
+            <br><br>
+            Im Mai 2017 schwor Comey unter Eid vor Senator Chuck Grassley, dass:
+            <br>
+            1. Er nie eine anonyme Quelle in Nachrichtenberichten über die Trump- oder Clinton-Ermittlungen gewesen sei.
+            <br>
+            2. Er nie jemand anderen beim FBI autorisiert habe, eine anonyme Quelle in Nachrichtenberichten über diese Ermittlungen zu sein.
+            <br><br>
+            Seine Antwort auf beide Fragen war ein klares <strong>"Nein"</strong>.
+            <br><br>
+            Diese Behauptung widerspricht jedoch der seines damaligen stellvertretenden Direktors, Andrew McCabe. McCabe erklärte, dass Comey die Weitergabe von Informationen im Zusammenhang mit der Clinton-Ermittlung bekannt war und er sie "effektiv autorisiert" habe. McCabe sagte, Comey habe es für eine "gute Idee" gehalten, diese Informationen den Medien zu präsentieren.
+            <br><br>
+            <strong>Die Sachlage ist binär: Die Aussagen von Comey und McCabe sind unvereinbar widersprüchlich</strong>. Einer von ihnen lügt unter Eid, was ein Bundesverbrechen darstellt.
+        </p>
+
+        <h2 class="timestamp">Der "Doppelte Eid" und die Frist (0:40 – 0:50)</h2>
+        <p class="speaker-text">
+            Die Staatsanwaltschaft konzentrierte sich auf eine spätere Aussage. Im September 2020, in einem Austausch mit Senator Ted Cruz, wurde Comey zu seiner früheren Aussage befragt und bekräftigte diese. Er erklärte: <strong>"Meine Aussage ist heute dieselbe"</strong>.
+            <br><br>
+            Diese Wiederholung im Jahr 2020 war für die Staatsanwälte entscheidend, da die fünfjährige Verjährungsfrist für die ursprüngliche angebliche Lüge von 2017 kurz vor dem Ablauf stand. Die einzige Möglichkeit, die Aussage von 2020 als Grundlage für die Anklage zu verwenden, bestand darin, dass Comey die Lüge von 2017 bekräftigte und sie dadurch auf den Zeitraum bis 2020 erweiterte. <strong>Die Verjährungsfrist für das Verbrechen von 2017 lief am darauffolgenden Dienstag ab</strong>.
+        </p>
+
+        <h2 class="timestamp">Die Einsetzung von Halligan (0:50 – 1:00)</h2>
+        <p class="speaker-text">
+            Die formelle Anklage erfolgte kurz bevor die Verjährungsfrist um Mitternacht ablief. Diese Dringlichkeit erklärt die ungewöhnlichen Maßnahmen des Justizministeriums (DOJ).
+            <br><br>
+            Der frühere US-Staatsanwalt für den Eastern District of Virginia, Erik Siebert, wurde entlassen (oder trat zurück), weil er sich Berichten zufolge geweigert hatte, die Anklage voranzutreiben. Er soll den Fall für <strong>"zu schwach"</strong> gehalten haben, um ihn vor Gericht zu bringen.
+            <br><br>
+            Siebert wurde durch <strong>Lindsey Halligan</strong> ersetzt, eine persönliche Anwältin von Donald Trump ohne vorherige Erfahrung als Staatsanwältin. Halligan wurde abrupt eingesetzt, um eines der wichtigsten Staatsanwaltsbüros des Landes zu leiten. Diese Aktion wurde von Kritikern Trumps als direkte Anweisung des Präsidenten interpretiert.
+            <br><br>
+            Halligan gelang die Anklage, wenn auch nur knapp: Nur 14 der 23 Stimmen der Grand Jury stimmten dafür, Comey in zwei der drei vorgeschlagenen Anklagepunkte anzuklagen, was die erforderliche Schwelle von 12 Stimmen nur <strong>knapp überschritt</strong>.
+            <br><br>
+            Für das konservative Publikum kann diese Dringlichkeit als verzweifelter Versuch interpretiert werden, Gerechtigkeit zu erlangen, bevor die Zeit ablief.
+        </p>
+        
+        <h2 class="timestamp">AKT III: Die Beweise (1:00 – 1:30) | Comeys Notizen & Steele-Dossier (1:00 – 1:15)</h2>
+        <p class="speaker-text">
+            Neben dem Widerspruch zu McCabe sind Beweise aufgetaucht, die nach Ansicht von Trumps Verbündeten die Anschuldigung bekräftigen, dass Comey über sein Wissen über die Bemühungen gegen Trump nicht ehrlich war.
+            <br><br>
+            Laut dem Zeugnis von Senator Lindsey Graham wurden handschriftliche Notizen von James Comey gefunden, datiert auf September 2016, die darauf hindeuten, dass <strong>er von Geheimdienstinformationen wusste, wonach Hillary Clinton plante, Donald Trump mit Russland in Verbindung zu bringen</strong>. In seiner eigenen Handschrift schrieb Comey: "J.B. [John Brennan], HRC plante, Trump zu verbinden". Dies soll ein Muster aufzeigen, das die Staatsanwälte nutzen werden, um zu beweisen, dass Comey über seine Erinnerungen und Aussagen vor dem Kongress gelogen hat.
+            <br><br>
+            Darüber hinaus stand das Steele-Dossier – die Anti-Trump-Untersuchung, die von der Hillary Clinton-Kampagne und dem DNC finanziert wurde und angeblich die Grundlage für die Verfolgung von Präsident Trump durch die Bundesregierung bildete – im Zentrum von Comeys Operationen.
+        </p>
+
+        <h2 class="timestamp">Daniel Richmond: Das Leak-Alias (1:15 – 1:30)</h2>
+        <p class="speaker-text">
+            Der Fall wurde durch brisante Berichte gestärkt, die einen direkten Beweis dafür liefern, dass Comey Leaks autorisiert hat, was seinen Eid von 2017 und 2020 widerlegt.
+            <br><br>
+            Die Beweise deuten auf <strong>Daniel Richmond</strong> hin, einen Columbia-Rechtsprofessor und Freund von Comey, der als Sonderregierungsangestellter für das FBI arbeitete. Dokumente zeigen eine Korrespondenz zwischen Comey und Richmond, die angeblich verdeutlicht, dass Comey wollte, dass Richmond Informationen durchsickern ließ, und dass Richmond als anonyme Quelle für *The New York Times* fungierte.
+            <br><br>
+            Comey verwendete eine alternative E-Mail-Adresse unter dem Alias <strong>Reinhold Neber</strong>.
+            <br><br>
+            Das stärkste Indiz betrifft Comeys Brief vom Oktober 2016 über die neuen E-Mails von Hillary Clinton. Comey nutzte Richmond, um die Presse "zu massieren", damit sie dachte, er habe edel und moralisch gehandelt. Comey schrieb an Richmond und bat ihn, einen Reporter "klüger" über die Bedeutung seiner Offenlegung im Juli zu machen. Er argumentierte, dass seine Untätigkeit "keine Option" gewesen sei. Richmond antwortete und bestätigte, dass er den Punkt an den Reporter weitergegeben habe.
+            <br><br>
+            <strong>Dies liefert einen direkten Beweis dafür, dass Comey Richmond autorisiert hat, Informationen an die Medien weiterzugeben</strong>, bevor er eine solche Autorisierung unter Eid bestritt.
+        </p>
+
+        <h2 class="timestamp">AKT IV: Kritik und Rechenschaft (1:30 – 2:00) | Verfahrensfehler (1:30 – 1:45)</h2>
+        <p class="speaker-text">
+            Es ist entscheidend, die scharfe Kritik an der Art und Weise der Anklageerhebung zu beleuchten, da dies die Erzählung nährt, der Fall könne eine "politische Rache" sein.
+            <br><br>
+            US-Staatsanwältin Lindsey Halligan hatte Berichten zufolge mehrere Verfahrensfehler. Bei ihrem ersten Auftritt als Staatsanwältin betrat sie den falschen Gerichtssaal und schien über die von ihr unterzeichneten Dokumente verwirrt zu sein. Richter Lindsay Vela wies darauf hin, dass ihr zwei widersprüchliche Anklagedokumente vorgelegt worden waren.
+            <br><br>
+            Darüber hinaus äußerte ein Bundesrichter Besorgnis und nannte das Verhalten der Staatsanwälte <strong>"höchst ungewöhnlich"</strong>. Er deutete an, der Prozess sei ein <strong>"übereilter Versuch, Comey anzuklagen"</strong> und habe "ein wenig das Gefühl: 'Zuerst anklagen, dann ermitteln'".
+            <br><br>
+            <strong>Für Kritiker Trumps deutet die Entlassung erfahrener Staatsanwälte und die Einsetzung von Halligan, Trumps persönlicher Anwältin ohne Staatsanwaltschaftserfahrung, zur Verfolgung eines Falles, den Karrierestaatsanwälte als "zu schwach" erachteten, auf maximale politische Einmischung im Justizministerium hin</strong>.
+        </p>
+
+        <h2 class="timestamp">Schlussplädoyer: Das Verbrechen (1:45 – 2:00)</h2>
+        <p class="speaker-text">
+            Trotz der Verfahrensfehler argumentiert die Pro-Trump-Perspektive, dass die eiligen Maßnahmen notwendig waren, um sicherzustellen, dass ein hochrangiger Beamter für ein schweres Verbrechen zur Rechenschaft gezogen wird, bevor die Verjährungsfrist dies verhindert.
+            <br><br>
+            <strong>Der Kern der Sache, so Senator Ted Cruz, ist nicht politische Vergeltung, sondern ein klares Bundesverbrechen</strong>. Er erklärte: "Entweder hat Jim Comey ein Verbrechen begangen, oder Andrew McCabe hat es getan. Es ist eine einfache binäre Wahl". Wenn die Beweise McCabes Geschichte untermauern und Comeys Geschichte als falsch erweisen, dann hat Comey "wissentlich und vorsätzlich ein Verbrechen begangen".
+            <br><br>
+            Die Existenz dieses Falles, selbst wenn er nicht zu einer Verurteilung führt, hat bereits eine <strong>abschreckende Wirkung</strong> (chilling effect) auf die Kritiker von Präsident Trump.
+            <br><br>
+            Die verbleibende Frage für unser Publikum ist: Ist es wichtiger, dass die politische Elite für Lügen unter Eid und die "Instrumentalisierung" der Regierung zur Rechenschaft gezogen wird, oder dass die richterlichen Verfahren pedantisch eingehalten werden, selbst wenn dies bedeutet, dass die Zeit abläuft?
+            <br><br>
+            Comey hat sich einen Prozess gewünscht. Nun muss die Justiz entscheiden, ob der ehemalige FBI-Direktor tatsächlich Leaks autorisiert und vor dem Kongress gelogen hat – ein Verbrechen, das Trumps Verbündete als fundamentalen Teil des gegen den Präsidenten entfesselten "politischen Krieges" betrachten.
+        </p>
+
+    </div>
+
+    <!-- STEUERLEISTE (BLEIBT UNVERÄNDERT) -->
+    <div id="controls">
+        <button id="play-pause-btn">Play</button>
+        <button id="reset-btn">Reset</button>
+
+        <label for="speed-slider">Tempo:</label>
+        <input type="range" id="speed-slider" min="1" max="100" value="20">
+        
+        <label for="fontsize-slider">Schriftgröße:</label>
+        <input type="range" id="fontsize-slider" min="20" max="80" value="36">
+
+        <label for="toggle-instructions">Anweisungen ausblenden:</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggle-instructions">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <!-- JAVASCRIPT (BLEIBT UNVERÄNDERT) -->
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hinweis: 'tpPane' ist 'document.body' in dieser Einzel-Datei-Version
+            const tpPane = document.body; 
+            const tpControls = document.getElementById('controls');
+            const tpPlayPauseBtn = tpControls.querySelector('#play-pause-btn');
+            const tpResetBtn = tpControls.querySelector('#reset-btn');
+            const tpSpeedSlider = tpControls.querySelector('#speed-slider');
+            const tpFontsizeSlider = tpControls.querySelector('#fontsize-slider');
+            const tpToggleInstructionsBtn = tpControls.querySelector('#toggle-instructions');
+            const tpSpeakerTexts = document.querySelectorAll('.speaker-text');
+
+            let isScrolling = false;
+            let scrollSpeed = parseFloat(tpSpeedSlider.value) / 40;
+            let animationFrameId = null;
+
+            // Scroll-Funktion
+            function tpScroll() {
+                if (!isScrolling) return;
+                window.scrollBy(0, scrollSpeed); // Scrollt das Hauptfenster
+                animationFrameId = requestAnimationFrame(tpScroll);
+            }
+
+            function tpTogglePlayPause() {
+                isScrolling = !isScrolling;
+                if (isScrolling) {
+                    tpPlayPauseBtn.textContent = 'Pause';
+                    tpScroll();
+                } else {
+                    tpPlayPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            }
+
+            // Event Listeners für Teleprompter
+            tpPlayPauseBtn.addEventListener('click', tpTogglePlayPause);
+
+            tpResetBtn.addEventListener('click', () => {
+                window.scrollTo(0, 0); // Scrollt das Hauptfenster nach oben
+                if (isScrolling) {
+                    isScrolling = false;
+                    tpPlayPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(animationFrameId);
+                }
+            });
+
+            tpSpeedSlider.addEventListener('input', (e) => {
+                scrollSpeed = parseFloat(e.target.value) / 40; 
+            });
+
+            tpFontsizeSlider.addEventListener('input', (e) => {
+                const newSize = e.target.value + 'px';
+                tpSpeakerTexts.forEach(textEl => {
+                    textEl.style.fontSize = newSize;
+                });
+            });
+
+            tpToggleInstructionsBtn.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.body.classList.add('hide-instructions');
+                } else {
+                    document.body.classList.remove('hide-instructions');
+                }
+            });
+
+            // Setzt die initiale Schriftgröße
+            const initialFontSize = tpFontsizeSlider.value + 'px';
+            tpSpeakerTexts.forEach(textEl => {
+                textEl.style.fontSize = initialFontSize;
+            });
+
+            // Keyboard-Steuerung (Leertaste)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ') { 
+                    e.preventDefault(); 
+                    tpTogglePlayPause();
+                } 
+            });
+        });
+    </script>
+
+</body>
+</html>
