@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Creación de Contenido</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            background-color: #111827; /* Fondo oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alineado arriba para ver el inicio */
+            min-height: 100vh;
+            padding: 40px 20px; /* Más padding */
+            font-family: 'Inter', sans-serif;
+            color: #E5E7EB; /* Texto claro */
+        }
+
+        #canvas {
+            background-color: #1F2937; /* Fondo de la tarjeta */
+            border-radius: 12px;
+            padding: 28px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border: 1px solid #374151;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #FFFFFF;
+            border-bottom: 2px solid #3B82F6; /* Acento azul */
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        /* Estructura de cada paso */
+        .schritt {
+            margin-bottom: 20px;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            overflow: hidden; /* para los bordes redondeados */
+            transition: opacity 0.4s ease;
+        }
+        
+        /* Ocultar el checkbox real */
+        .step-checkbox {
+            display: none;
+        }
+
+        /* El título/label que funciona como un botón de check */
+        .step-title {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background-color: #374151; /* Color de cabecera */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .step-title:hover {
+            background-color: #4B5563;
+        }
+
+        .step-nummer {
+            font-size: 18px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 12px 0 4px;
+        }
+
+        .schritt-titel {
+            font-size: 20px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin: 0;
+        }
+        
+        /* El "checkbox" personalizado */
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            background-color: #1F2937;
+            border: 2px solid #3B82F6;
+            border-radius: 4px;
+            margin-right: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        /* La marca de "check" (oculta por defecto) */
+        .custom-checkbox::after {
+            content: '✔';
+            font-size: 16px;
+            color: #FFFFFF;
+            opacity: 0; /* Oculto */
+            transform: scale(0.5);
+            transition: all 0.2s ease;
+        }
+
+        .step-content {
+            padding: 20px 24px;
+            background-color: #1F2937;
+            font-size: 16px;
+            line-height: 1.6;
+            border-top: 1px solid #374151;
+            transition: opacity 0.4s ease;
+        }
+        
+        /* --- ESTILOS DE "COMPLETADO" --- */
+        .step-checkbox:checked + .step-title {
+            background-color: #3e4c60; /* Un color de fondo más sutil */
+        }
+
+        .step-checkbox:checked + .step-title .custom-checkbox {
+            background-color: #059669; /* Verde de éxito */
+            border-color: #059669;
+        }
+        
+        .step-checkbox:checked + .step-title .custom-checkbox::after {
+            opacity: 1; /* Mostrar check */
+            transform: scale(1);
+        }
+
+        .step-checkbox:checked + .step-title .schritt-titel {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .step-checkbox:checked ~ .step-content {
+            opacity: 0.5; /* Atenuar el contenido */
+        }
+        /* --- FIN ESTILOS DE "COMPLETADO" --- */
+
+
+        /* Estilos para campos de formulario */
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #FFFFFF;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            background-color: #374151;
+            border: 1px solid #4B5563;
+            border-radius: 6px;
+            padding: 10px;
+            color: #E5E7EB;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+        }
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Estilo para el bloque de prompt */
+        pre {
+            background-color: #111827;
+            border: 1px solid #374151;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 15px;
+            white-space: pre-wrap; /* Para que el texto se ajuste */
+            word-wrap: break-word;
+            position: relative; /* Para el botón de copiar */
+        }
+        
+        .copy-button {
+            background-color: #3B82F6; /* Azul */
+            color: #FFFFFF;
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
+        .copy-button:hover {
+            background-color: #2563EB;
+        }
+        .copy-button.copied {
+            background-color: #059669; /* Verde */
+        }
+        
+        code {
+            font-family: monospace;
+            background-color: #374151;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="canvas">
+        
+        <h1>Manual de Creación de Contenido</h1>
+        
+        <div class="schritt">
+            <input type="checkbox" class="step-checkbox" id="step1">
+            <label class="step-title" for="step1">
+                <span class="custom-checkbox"></span>
+                <span class="step-nummer">1</span>
+                <h2 class="schritt-titel">Definir Tema y Variables</h2>
+            </label>
+            
+            <div class="step-content">
+                <p>Define el tema central de tu nueva presentación y los puntos clave que la IA debe investigar.</p>
+                <div style="margin-top: 16px;">
+                    <label for="tema-input" class="form-label">Nuevo Tema:</label>
+                    <input type="text" id="tema-input" class="form-input" placeholder="Ej: La crisis de los misiles en Cuba">
+                </div>
+                <div style="margin-top: 16px;">
+                    <label for="variables-textarea" class="form-label">Variables Clave / Puntos a Investigar:</label>
+                    <textarea id="variables-textarea" class="form-textarea" placeholder="Ej: 
+- Actores principales (Kennedy, Jrushchov, Castro)
+- Cronología (16 al 28 de octubre de 1962)
+- El rol de los misiles en Turquía
+- Cómo se resolvió (acuerdo secreto)
+- Consecuencias (Teléfono rojo)"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="schritt">
+            <input type="checkbox" class="step-checkbox" id="step2">
+            <label class="step-title" for="step2">
+                <span class="custom-checkbox"></span>
+                <span class="step-nummer">2</span>
+                <h2 class="schritt-titel">Generar el Prompt para la IA</h2>
+            </label>
+            
+            <div class="step-content">
+                <p>Copia la siguiente plantilla y pégala en tu chat de IA. Reemplaza manualmente los textos <code>[TU TEMA AQUÍ]</code> y <code>[TUS VARIABLES AQUÍ]</code> con lo que escribiste en el Paso 1.</p>
+                
+                <pre>
+<button id="copy-prompt-btn" class="copy-button">Copiar Prompt</button>
+Por favor, actúa como un investigador experto y redactor de guiones. Necesito que investigues a fondo el siguiente tema:
+<strong>[TU TEMA AQUÍ]</strong>
+
+Con base en tu investigación, enfócate en estos puntos clave:
+<strong>[TUS VARIABLES AQUÍ]</strong>
+
+Tu tarea es generar dos archivos HTML completos. Estos archivos deben seguir EXACTAMENTE la misma estructura, estilos CSS y funcionalidad JavaScript que los archivos de ejemplo (`solo_slides.html` y `solo_teleprompter.html`) que hemos usado en el pasado.
+
+TAREA 1: ARCHIVO "solo_slides.html"
+1.  Genera 10 diapositivas (divs con clase "slide").
+2.  La primera diapositiva debe ser el Título.
+3.  Las diapositivas 2-9 deben desarrollar el tema basándose en las variables clave.
+4.  La diapositiva 10 debe ser una conclusión o para "Preguntas".
+5.  Para cada diapositiva, crea un título (h1 o h2) y 3-5 puntos clave (li).
+6.  Para las diapositivas 1 a 8, incluye un `image-container`. En el `src=""`, pon un nombre de imagen lógico (ej: `images/tema-1.jpg`, `images/mapa.png`). En el `alt=""`, pon una descripción de lo que la imagen debería mostrar.
+
+TAREA 2: ARCHIVO "solo_teleprompter.html"
+1.  Genera el contenido del guion para el teleprompter.
+2.  El guion debe estar sincronizado con las 10 diapositivas.
+3.  Usa la estructura de `timestamp`, `instruction` (para indicar cuándo cambiar de slide) y `speaker-text` (el texto que el presentador leerá).
+4.  El guion debe ser detallado, profesional y estar escrito en ALEMÁN.
+
+Por favor, entrega tu respuesta como dos bloques de código, uno para `solo_slides.html` y otro para `solo_teleprompter.html`.
+                </pre>
+            </div>
+        </div>
+        
+        <div class="schritt">
+            <input type="checkbox" class="step-checkbox" id="step3">
+            <label class="step-title" for="step3">
+                <span class="custom-checkbox"></span>
+                <span class="step-nummer">3</span>
+                <h2 class="schritt-titel">Crear y Subir Archivos</h2>
+            </label>
+            
+            <div class="step-content">
+                <p>Una vez que la IA te dé los dos bloques de código:</p>
+                <ul style="padding-left: 20px;">
+                    <li style="margin-bottom: 8px;">Abre tu repositorio de GitHub (`proyecto-petro`).</li>
+                    <li style="margin-bottom: 8px;">Haz clic en `solo_slides.html`, presiona "Editar" y pega el nuevo código. Guarda (Commit) los cambios.</li>
+                    <li style="margin-bottom: 8px;">Haz lo mismo para `solo_teleprompter.html`.</li>
+                    <li style="margin-bottom: 8px;"><strong>MUY IMPORTANTE:</strong> Ve a la carpeta `/images/` en GitHub. Sube todas las imágenes nuevas que necesitarás (las que la IA sugirió en los `alt=""` de las diapositivas) y asegúrate de que los nombres coincidan.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="schritt">
+            <input type="checkbox" class="step-checkbox" id="step4">
+            <label class="step-title" for="step4">
+                <span class="custom-checkbox"></span>
+                <span class="step-nummer">4</span>
+                <h2 class="schritt-titel">Probar y Lanzar</h2>
+            </label>
+            
+            <div class="step-content">
+                <p>¡Ya casi estás listo! Ahora, prueba que todo funcione antes de ir en vivo.</p>
+                <ul style="padding-left: 20px;">
+                    <li style="margin-bottom: 8px;">Espera 1-2 minutos a que GitHub Pages se actualice.</li>
+                    <li style="margin-bottom: 8px;">Abre tu archivo `info.html` (el lanzador).</li>
+                    <li style="margin-bottom: 8px;">Usa los enlaces de `info.html` para abrir tus dos ventanas (Slides y Teleprompter).</li>
+                    <li style="margin-bottom: 8px;">Pasa por todas las diapositivas y prueba tu guion. ¡Mucho éxito en tu presentación!</li>
+                </ul>
+            </div>
+        </div>
+
+
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const copyButton = document.getElementById('copy-prompt-btn');
+            const promptBlock = copyButton.closest('pre');
+            
+            copyButton.addEventListener('click', () => {
+                // Clonar el nodo para no modificar el original
+                const clone = promptBlock.cloneNode(true);
+                // Quitar el botón del clon antes de copiar
+                clone.querySelector('.copy-button').remove();
+                
+                const promptText = clone.textContent || clone.innerText;
+
+                navigator.clipboard.writeText(promptText.trim()).then(() => {
+                    // Éxito
+                    copyButton.textContent = '✅ Copiado';
+                    copyButton.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copiar Prompt';
+                        copyButton.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    copyButton.textContent = 'Error';
+                    console.error('Error al copiar: ', err);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
