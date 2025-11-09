@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Präsentation: Fall James Comey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; overflow: hidden; }
+        
+        /* Klickbarer Cursor für Touch-Steuerung */
+        #presentation-container { 
+            position: relative; 
+            width: 100%; 
+            height: 100vh; 
+            overflow: hidden; 
+            cursor: pointer; /* Zeigt Interaktivität an */
+        }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 5% 8%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; opacity: 0; transform: translateX(20px); transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out; visibility: hidden; }
+        .slide.active { opacity: 1; transform: translateX(0); visibility: visible; }
+        .reveal-item { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; transition-delay: 0s; }
+        .reveal-item.revealed { opacity: 1; transform: translateY(0); }
+        .text-accent-red { color: #EF4444; }
+        .text-accent-blue { color: #3B82F6; }
+        #controls-wrapper { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #1F2937; z-index: 100; }
+        #slide-pane #controls { display: flex; justify-content: center; align-items: center; padding: 12px 0; }
+        .control-btn { background: none; border: none; color: #F9FAFB; cursor: pointer; padding: 8px 12px; margin: 0 10px; border-radius: 8px; transition: background-color 0.2s; }
+        .control-btn:hover { background-color: #374151; }
+        .control-btn svg { width: 24px; height: 24px; pointer-events: none; }
+        .image-container { max-width: 450px; width: 100%; margin-top: 1.5rem; }
+        .image-container img { width: 100%; height: auto; border-radius: 12px; border: 2px solid #374151; cursor: zoom-in; } /* Zoom-Cursor */
+        .slide-layout { display: flex; flex-direction: column; width: 100%; height: 100%; justify-content: center; align-items: center; }
+        @media (min-width: 768px) { .slide-layout { flex-direction: row; gap: 2rem; } .slide-layout .content { flex-basis: 50%; text-align: left; } .slide-layout .image-container { flex-basis: 50%; margin-top: 0; } ul { padding-left: 1.5rem; } }
+        .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 1000; cursor: zoom-out; }
+        #lightbox-image { max-width: 90%; max-height: 90vh; border-radius: 8px; border: 2px solid #F9FAFB; }
+        .lightbox-close { position: absolute; top: 20px; right: 35px; color: #F9FAFB; font-size: 40px; font-weight: bold; cursor: pointer; line-height: 1; }
+    </style>
+</head>
+<body>
+    <div id="presentation-container">
+        
+        <!-- FOLIE 1: TITEL (AKT I) -->
+        <div class="slide active"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h1 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">GERECHTIGKEIT ODER RACHE?</h1> 
+                    <h2 class="reveal-item text-2xl md:text-3xl font-bold mb-6">Der Fall James Comey</h2>
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Anklage: Falschaussage & Behinderung</li> 
+                        <li class="reveal-item text-accent-blue">Trumps "Vergeltungsliste"</li> 
+                        <li class="reveal-item">Comey: "Ich bin unschuldig"</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Zeigt Comey und Trump -->
+                    <img src="images/comey-title.jpg" alt="Gegenüberstellung von James Comey und Donald Trump"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 2: KONTEXT "INSTRUMENTALISIERUNG" (AKT I) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Kontext: "Instrumentalisierung"</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">FBI-Untersuchung 2016 (Russland)</li> 
+                        <li class="reveal-item">Vorwurf: Regierung gegen Trump "instrumentalisiert"</li> 
+                        <li class="reveal-item text-accent-blue">Forderung nach Rechenschaft (Gill, Brennan)</li> 
+                        <li class="reveal-item">Kernvorwurf: Lügen vor dem Kongress</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Kapitol oder DOJ-Siegel -->
+                    <img src="images/comey-capitol.jpg" alt="US-Kapitol mit dem Logo des Justizministeriums"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 3: KERN DER LÜGE (AKT II) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Der Kern der Lüge: Comey vs. McCabe</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Comey (Mai 2017): <strong>"Nein"</strong>, er habe nie Leaks autorisiert.</li> 
+                        <li class="reveal-item">McCabe: <strong>"Ja"</strong>, Comey hat Leaks "effektiv autorisiert".</li> 
+                        <li class="reveal-item text-accent-red">Die Sachlage ist binär: Einer lügt unter Eid.</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Gegenüberstellung Comey / McCabe -->
+                    <img src="images/comey-mccabe.jpg" alt="Gegenüberstellung von James Comey und Andrew McCabe"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 4: DER "DOPPELTE EID" (AKT II) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Der "Doppelte Eid" & die Frist</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Sept. 2020: Comey (zu Ted Cruz): "Meine Aussage ist heute dieselbe."</li> 
+                        <li class="reveal-item">Trick: Dies umgeht die 5-jährige Verjährungsfrist der Tat von 2017.</li> 
+                        <li class="reveal-item text-accent-red">Die Verjährungsfrist lief am nächsten Dienstag ab.</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Comey vor Kongress / Ted Cruz -->
+                    <img src="images/comey-cruz.jpg" alt="James Comey schwört vor dem Kongress, mit Ted Cruz im Hintergrund"> 
+                </div> 
+            </div> 
+        </div>
+        
+        <!-- FOLIE 5: DIE ÜBERSTÜRZTE ANKLAGE (AKT II) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Die überstürzte Anklage</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Staatsanwalt Siebert (Karriere) entlassen: Fall "zu schwach".</li> 
+                        <li class="reveal-item">Lindsey Halligan (Trumps Anwältin) eingesetzt.</li> 
+                        <li class="reveal-item">Halligan hatte keine Erfahrung als Staatsanwältin.</li> 
+                        <li class="reveal-item text-accent-blue">Grand Jury: Anklage mit 14/23 Stimmen (knapp).</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: DOJ-Siegel -->
+                    <img src="images/comey-doj.jpg" alt="Das Siegel des US-Justizministeriums (DOJ)"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 6: BEWEISSTÜCK A: NOTIZEN (AKT III) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Beweise (I): Comeys Notizen</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Handnotiz von Comey (Sept 2016) gefunden.</li> 
+                        <li class="reveal-item">Inhalt: "J.B. [Brennan], HRC plante, Trump zu verbinden".</li> 
+                        <li class="reveal-item">Beweis: Zeigt, dass Comey von Clintons Plan wusste.</li> 
+                        <li class="reveal-item text-accent-red">Soll Lügenmuster vor dem Kongress beweisen.</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Bild einer handschriftlichen Notiz -->
+                    <img src="images/comey-memo.png" alt="Faksimile einer handschriftlichen Notiz von James Comey"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 7: BEWEISSTÜCK B: STEELE-DOSSIER (AKT III) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Beweise (II): Das Steele-Dossier</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Anti-Trump-Dossier, finanziert von Clinton & DNC.</li> 
+                        <li class="reveal-item">Grundlage für die "Instrumentalisierung" der Regierung.</li> 
+                        <li class="reveal-item">Vorwurf: Brennan log über die Genehmigung zur Nutzung des Dossiers.</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Bild eines "Top Secret" Dokuments -->
+                    <img src="images/comey-dossier.png" alt="Symbolbild eines als 'Top Secret' markierten Dossiers"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 8: BEWEISSTÜCK C: RICHMOND (AKT III) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Beweise (III): Der "Leak-Partner"</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Daniel Richmond (Freund Comeys) als FBI-Mitarbeiter.</li> 
+                        <li class="reveal-item">Comey benutzte "Burner Gmail" (Alias: Reinhold Neber).</li> 
+                        <li class="reveal-item">E-Mails: Comey bat Richmond, Reporter zu "massieren".</li> 
+                        <li class="reveal-item text-accent-blue">Direkter Beweis: Comey autorisierte Leaks, die er unter Eid abstritt.</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Symbolbild E-Mail -->
+                    <img src="images/comey-richmond.jpg" alt="Symbolbild einer E-Mail-Korrespondenz"> 
+                </div> 
+            </div> 
+        </div>
+
+        <!-- FOLIE 9: KRITIK AM VERFAHREN (AKT IV) -->
+        <div class="slide"> 
+            <div class="slide-layout"> 
+                <div class="content"> 
+                    <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-red">Kritik am Verfahren</h2> 
+                    <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc"> 
+                        <li class="reveal-item">Halligans angebliche Fehler (falscher Gerichtssaal, verwirrt).</li> 
+                        <li class="reveal-item">Bundesrichter: Fall ist "höchst ungewöhnlich".</li> 
+                        <li class="reveal-item">Gefühl: "Zuerst anklagen, dann ermitteln".</li> 
+                        <li class="reveal-item">Kritiker: Maximale politische Einmischung Trumps.</li> 
+                    </ul> 
+                </div> 
+                <div class="reveal-item image-container"> 
+                    <!-- BILD ERSETZEN: Richterhammer -->
+                    <img src="images/comey-gavel.jpg" alt="Richterhammer in einem Gerichtssaal"> 
+                </div> 
+            </div> 
+        </div>
+        
+        <!-- FOLIE 10: FAZIT (AKT IV) -->
+        <div class="slide"> 
+            <h2 class="reveal-item text-4xl md:text-5xl font-extrabold mb-6 text-accent-blue">Fazit: Gerechtigkeit oder Rache?</h2> 
+            <ul class="reveal-item text-xl md:text-2xl space-y-3 list-disc max-w-3xl mx-auto"> 
+                <li class="reveal-item">Cruz: Es geht um ein klares Verbrechen (Comey ODER McCabe lügt).</li> 
+                <li class="reveal-item">Rechenschaftspflicht vs. Eilverfahren.</li> 
+                <li class="reveal-item text-accent-red">"Abschreckende Wirkung" auf Trump-Kritiker.</li> 
+                <li class="reveal-item">Comey wollte einen Prozess. Jetzt muss die Justiz entscheiden.</li> 
+            </ul> 
+        </div>
+
+    </div>
+
+    <!-- Steuerelemente (versteckt, aber für Tasten/Touch funktional) -->
+    <div id="controls-wrapper"> 
+        <div id="controls" style="display: none;">
+            <button id="prev-btn" class="control-btn"></button> 
+            <button id="next-btn" class="control-btn"></button> 
+        </div> 
+    </div>
+    
+    <!-- Lightbox (Zoom-Modus) -->
+    <div id="lightbox" class="lightbox-overlay"> 
+        <span class="lightbox-close">&times;</span> 
+        <img id="lightbox-image" src="" alt="Vergrößerte Ansicht"> 
+    </div>
+    
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightbox-image');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            const slideImages = document.querySelectorAll('.image-container img');
+            let currentSlide = 0;
+
+            function openLightbox(src) { lightboxImage.src = src; lightbox.style.display = 'flex'; }
+            function closeLightbox() { lightbox.style.display = 'none'; lightboxImage.src = ''; }
+            
+            slideImages.forEach(img => { 
+                img.addEventListener('click', (e) => { 
+                    e.stopPropagation(); // Stoppt Klick-Event, um nicht zur nächsten Folie zu wechseln
+                    openLightbox(img.src); 
+                }); 
+            });
+            
+            lightboxClose.addEventListener('click', (e) => {
+                e.stopPropagation(); // Verhindert, dass der Klick die Folie wechselt
+                closeLightbox();
+            });
+            
+            lightbox.addEventListener('click', (e) => { 
+                if (e.target === lightbox) { // Nur schließen, wenn auf den Hintergrund geklickt wird
+                    closeLightbox(); 
+                }
+            });
+
+            function showSlide(index) {
+                slides.forEach((slide) => { slide.classList.remove('active'); });
+                const slide = slides[index];
+                if (!slide) return;
+                slide.classList.add('active');
+                currentSlide = index;
+                const items = slide.querySelectorAll('.reveal-item');
+                items.forEach((item, index) => {
+                    item.classList.remove('revealed');
+                    item.style.transitionDelay = `${index * 250}ms`;
+                    setTimeout(() => { item.classList.add('revealed'); }, 50);
+                });
+            }
+            function nextSlide() { let next = currentSlide + 1; if (next >= slides.length) { next = 0; } showSlide(next); }
+            function prevSlide() { let prev = currentSlide - 1; if (prev < 0) { prev = slides.length - 1; } showSlide(prev); }
+            
+            showSlide(0); // Zeigt die erste Folie
+
+            // --- TASTENSTEUERUNG ---
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.style.display === 'flex') { 
+                    if (e.key === 'Escape') { closeLightbox(); } 
+                    return; 
+                }
+                if (e.key === 'ArrowRight') { nextSlide(); } 
+                else if (e.key === 'ArrowLeft') { prevSlide(); }
+                else if (e.key === 'Enter') {
+                    e.preventDefault(); 
+                    const activeSlide = document.querySelector('.slide.active');
+                    if (activeSlide) { 
+                        const image = activeSlide.querySelector('.image-container img'); 
+                        if (image) { openLightbox(image.src); } 
+                    }
+                }
+            });
+
+            // --- TOUCH-STEUERUNG (TIPPEN) ---
+            presentationContainer.addEventListener('click', (e) => {
+                // Nicht auslösen, wenn auf ein Bild (zum Zoomen) oder die Lightbox geklickt wurde
+                if (e.target.closest('.image-container img') || e.target.closest('#lightbox')) {
+                    return;
+                }
+
+                const clickX = e.clientX;
+                const windowWidth = window.innerWidth;
+
+                if (clickX > windowWidth / 2) {
+                    nextSlide(); // Tippen auf die rechte Hälfte
+                } else {
+                    prevSlide(); // Tippen auf die linke Hälfte
+                }
+            });
+        });
+    </script>
+</body>
+</html>
